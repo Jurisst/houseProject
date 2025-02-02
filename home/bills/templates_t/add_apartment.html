@@ -1,0 +1,9 @@
+r"<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Add Apartment</button>
+</form>
+  {% if err %}
+    <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
+  {% endif %}"
+  
