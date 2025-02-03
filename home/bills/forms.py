@@ -32,11 +32,17 @@ class ApartmentForm(forms.ModelForm):
         model = Apartment
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['houseLocation'].label_from_instance = lambda obj: obj.address
+        self.fields['consumer'].label_from_instance = lambda obj: obj.name
+
 
 class MeterForm(forms.ModelForm):
     class Meta:
         model = Meter
         fields = '__all__'
+    series = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -112,15 +112,18 @@ def add_service(request):
 
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def add_house(request):
+    houses_list = []
+    for house in houses:
+        houses_list.append(house.address)
     text = None
     if request.method == 'POST':
         form = HouseForm(request.POST)
         if form.is_valid():
-            house = form.save()  # Saves the new object to the database
-            return redirect('success_house', house_id=house.id)  # Redirect to a success page
-        else:
-            text = 'ERROR IN FORM'
-
+            if form['address'] in houses_list:
+                text = 'House address already registered'
+            else:
+                house = form.save()  # Saves the new object to the database
+                return redirect('success_house', house_id=house.id)  # Redirect to a success page
     else:
         form = HouseForm()
     if text:
@@ -132,14 +135,18 @@ def add_house(request):
 
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def add_consumer(request):
+    consumers_contracts_list = []
+    for consumer in consumers:
+        consumers_contracts_list.append(consumer.contract_nr)
     text = None
     if request.method == 'POST':
         form = ConsumerForm(request.POST)
         if form.is_valid():
-            consumer = form.save()  # Saves the new object to the database
-            return redirect('success_consumer', consumer_id=consumer.id)  # Redirect to a success page
-        else:
-            text = 'ERROR IN FORM'
+            if form['contract_nr'] in consumers_contracts_list:
+                text = 'This contract number is already registered'
+            else:
+                consumer = form.save()  # Saves the new object to the database
+                return redirect('success_consumer', consumer_id=consumer.id)  # Redirect to a success page
     else:
         form = ConsumerForm()
     if text:
@@ -151,14 +158,20 @@ def add_consumer(request):
 
 @cache_control(no_store=True, no_cache=True, must_revalidate=True)
 def add_apartment(request):
+    house_apartments_list = []
+    for apartment in apartments:
+        house_apartment = str(apartment.houseLocation.id), str(apartment.apartment_nr)
+        house_apartments_list.append(house_apartment)
     text = None
     if request.method == 'POST':
         form = ApartmentForm(request.POST)
         if form.is_valid():
-            apartment = form.save()  # Saves the new object to the database
-            return redirect('success_apartment', apartment_id=apartment.id)  # Redirect to a success page
-        else:
-            text = 'ERROR IN FORM'
+            house_apartment = form['houseLocation'].value(), form['apartment_nr'].value()
+            if house_apartment in house_apartments_list:
+                text = 'Apartment is already registered'
+            else:
+                apartment = form.save()  # Saves the new object to the database
+                return redirect('success_apartment', apartment_id=apartment.id)  # Redirect to a success page
     else:
         form = ApartmentForm()
     if text:

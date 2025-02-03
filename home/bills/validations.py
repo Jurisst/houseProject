@@ -16,3 +16,8 @@ def valid_reg_number(form_input):
         raise ValidationError(f"Wrong format: {form_input}, must be like LV900...045")
 
 
+def valid_bank_account(form_input):
+    pattern = r'^[A-Z]\d{2}[A-Z]{4}\d{20}$'
+    if not re.match(pattern, form_input):
+        raise ValidationError(f"Wrong format: {form_input}, must be like LV79HABA...045")
+

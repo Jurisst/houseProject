@@ -13,10 +13,8 @@ class Provider(models.Model):
         valid_provider_name
     ])
     # enterprise format (SIA, AS, IU etc)
-    business_form = models.CharField(max_length=15, validators=[
-        MinLengthValidator(2, 'Must be at least 2 characters'),
-        MaxLengthValidator(15, 'Max length is 15 characters')
-    ])
+    CHOICES = [('sia', 'SIA'), ('as', 'AS'), ('iu', 'IU'), ('sdv', 'SDV')]
+    business_form = models.CharField(max_length=15, choices=CHOICES)
     # registration number of provider (e.g. LV4000045678))
     reg_number = models.CharField(max_length=25, validators=[
         MinLengthValidator(11, 'Must be at least 11 characters'),
@@ -31,7 +29,7 @@ class Provider(models.Model):
 
 
 class House(models.Model):
-    address = models.CharField(max_length=30, validators=[
+    address = models.CharField(max_length=50, validators=[
         MinLengthValidator(6, 'Must be at least 6 characters'),
         MaxLengthValidator(50, 'Max length is 50 characters')
     ])
@@ -77,9 +75,11 @@ class Apartment(models.Model):
 class Meter(models.Model):
     CHOICES = [('cold', 'Cold water'), ('hot', 'Hot water'), ('heat', 'Heat'), ('other', 'Other')]
     type = models.CharField(max_length=10, choices=CHOICES)
+    manufacturer = models.CharField(default=" ", max_length=30, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
+    series = models.CharField(default=" ", max_length=30, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
     number = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
     reading_default = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
-    verification_date = models.DateField(("Date"), default=date.today)
+    verification_date = models.DateField("Date", default=date.today)
     apartment_number = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     previous_reading = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
     new_reading = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])

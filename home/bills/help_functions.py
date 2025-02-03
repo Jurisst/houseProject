@@ -69,5 +69,9 @@ def is_valid_string(s):
 
 def manage_db_table(objects):
     for obj in objects:
-        print(obj.name) # prints object's field
+        # print(obj.name) # prints object's field
         obj.delete()
+
+
+# def get_object_field_by_key(key):
+

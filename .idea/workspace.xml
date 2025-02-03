@@ -4,43 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="183c4ec4-05a5-4edf-b385-3cd598d8a7f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/HouseProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/help_functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/static/css/styles.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/add_provider.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/add_service.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/base_t.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/sp_provider_add.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/templates/sp_service_add.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/url_generator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/validations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/bills/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/db.sqlite3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/asgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/db.sqlite3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/home/wsgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/home/manage.py" afterDir="false" />
+    <list default="true" id="183c4ec4-05a5-4edf-b385-3cd598d8a7f1" name="Changes" comment="changes to all">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/bills/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/bills/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/bills/help_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/bills/help_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/bills/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/bills/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/bills/validations.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/bills/validations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/bills/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/bills/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/home/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/home/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +29,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Jurisst&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Jurisst/houseProject.git&quot;,
+    &quot;accountId&quot;: &quot;bc330e92-224e-4304-8873-7f6ff895d0ac&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -69,25 +52,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Python.forms.executor&quot;: &quot;Run&quot;,
-    &quot;Python.help_functions.executor&quot;: &quot;Run&quot;,
-    &quot;Python.models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.settings.executor&quot;: &quot;Run&quot;,
-    &quot;Python.url_generator.executor&quot;: &quot;Run&quot;,
-    &quot;Python.urls.executor&quot;: &quot;Run&quot;,
-    &quot;Python.views.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/PycharmProjects/HouseProject/home/bills&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.updates&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Python.forms.executor": "Run",
+    "Python.help_functions.executor": "Run",
+    "Python.models.executor": "Run",
+    "Python.settings.executor": "Run",
+    "Python.url_generator.executor": "Run",
+    "Python.urls.executor": "Run",
+    "Python.views.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/user/PycharmProjects/extract_needed.py",
+    "settings.editor.selected.configurable": "preferences.updates"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\PycharmProjects\HouseProject\home\bills" />
@@ -114,10 +97,40 @@
       <option name="presentableId" value="Default" />
       <updated>1737448207040</updated>
     </task>
+    <task id="LOCAL-00001" summary="changes to all">
+      <option name="closed" value="true" />
+      <created>1738503573104</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1738503573104</updated>
+    </task>
+    <task id="LOCAL-00002" summary="changes to all">
+      <option name="closed" value="true" />
+      <created>1738503608500</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1738503608500</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="changes to all" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes to all" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
