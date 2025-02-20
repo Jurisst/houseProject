@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %} Service added {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+<a href="{% url 'add_service_here' house_id %}">Add another service</a>
+<a href="{% url 'services_by_house' house_id %}">Back to services</a>
+</aside>
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Success!</h1>
+<p>Service has been saved</p>
+
+{% endblock %}
+

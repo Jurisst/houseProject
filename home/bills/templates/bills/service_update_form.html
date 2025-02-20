@@ -1,0 +1,29 @@
+
+{% extends 'base.html' %}
+
+    {% block title %} Update service {% endblock %}
+
+    {% block sidebar %}
+    <aside class="vertical-menu">
+        <a href="{% url 'add_service' %}">Add new service</a>
+        <a href="{% url 'services' %}">Back</a>
+        <a href="{% url 'index' %}">Back to start</a>
+        <a href="#">Profile</a>
+        <a href="#">Settings</a>
+        <a href="#">Logout</a>
+    </aside>
+    {% endblock %}
+
+    {% block content %}
+    <h2>Update service info</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Save information</button>
+    </form>
+      {% if err %}
+        <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
+      {% endif %}
+
+    {% endblock %}

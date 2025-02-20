@@ -1,0 +1,31 @@
+
+{% extends 'base.html' %}
+
+    {% block title %} Update house {% endblock %}
+
+    {% block sidebar %}
+    <aside class="vertical-menu">
+        <a href="{% url 'apartments_by_house' house.id %}">Apartments here</a>
+        <a href="{% url 'services_by_house' house.id %}">Services here</a>
+        <a href="{% url 'add_house' %}">Add new house</a>
+        <a href="{% url 'houses' %}">Back</a>
+        <a href="{% url 'index' %}">Back to start</a>
+        <a href="#">Profile</a>
+        <a href="#">Settings</a>
+        <a href="#">Logout</a>
+    </aside>
+    {% endblock %}
+
+    {% block content %}
+    <h2>Update house info</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Save information</button>
+    </form>
+      {% if err %}
+        <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
+      {% endif %}
+
+    {% endblock %}

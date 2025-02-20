@@ -1,0 +1,26 @@
+
+{% extends 'base.html' %}
+
+{% block title %} Providers {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'add_provider' %}">Add Provider</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<h2> Providers list </h2>
+
+<ul>
+    {% for item in object_list %}
+      <li>
+          <a href="{% url 'provider_update' item.pk %}">{{ item }}</a>
+      </li>
+    {% endfor %}
+</ul>
+{% endblock %}

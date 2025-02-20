@@ -1,0 +1,7 @@
+List Views: add Back to main (sidebar link position 2)
+Apartments list: order by Desc or remove?
+Meters update: apartments number without address - add address or create link only for apartment id?
+Update Views: add To main page (sidebar link position 3)
+houses/meters for house (sidebar link + url/view/template)
+apartments/meters for apartment (sidebar link + url/view/template)/meter fields to template?
+New model Reading

@@ -1,0 +1,34 @@
+
+{% extends 'base.html' %}
+
+{% block title %} House - apartments {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'house_update' house.id %}">Back to house</a>
+    <a href="{% url 'add_apartment_here' house.id %}">Add Apartment here</a>
+    <a href="{% url 'add_service_here' house.id %}">Add Service here</a>
+    <a href="{% url 'add_house' %}">Add House</a>
+    <a href="{% url 'add_apartment' %}">Add Apartment</a>
+    <a href="{% url 'add_consumer' %}">Add Consumer</a>
+    <a href="{% url 'add_meter' %}">Add Meter</a>
+
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<h2>Apartment's list in {{ house }}</h2>
+<ul>
+    {% for item in house_apartments %}
+      <li>
+          <a href="{% url 'apartment_update' item.pk %}">{{ item }}</a>
+      </li>
+    {% empty %}
+            <li>No products found in this category.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'add_apartment_here' house.id %}">Add apartment here</a>
+{% endblock %}

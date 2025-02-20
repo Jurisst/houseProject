@@ -11,7 +11,22 @@ class ProviderForm(forms.ModelForm):
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
-        fields = ['name', 'service_type', 'measuring_units', 'meters_of_volume']
+        fields = '__all__'
+
+
+class ServiceForm2(forms.ModelForm):
+    class Meta:
+        model = Service
+        # exclude = ('house',)
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'house' in self.fields:
+            # self.fields['address'].widget = forms.HiddenInput()  # Hide the field
+            self.fields['house'].widget = forms.HiddenInput()
+        else:
+            self.fields['house'].label_from_instance = lambda obj: obj.address
 
 
 class HouseForm(forms.ModelForm):
@@ -34,7 +49,23 @@ class ApartmentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['houseLocation'].label_from_instance = lambda obj: obj.address
+        self.fields['address'].label_from_instance = lambda obj: obj.address
+        self.fields['consumer'].label_from_instance = lambda obj: obj.name
+
+
+class ApartmentForm2(forms.ModelForm):
+    class Meta:
+        model = Apartment
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['consumer'].label_from_instance = lambda obj: obj.name
+        if 'address' in self.fields:
+            # self.fields['address'].widget = forms.HiddenInput()  # Hide the field
+            self.fields['address'].widget = forms.HiddenInput()
+        else:
+            self.fields['address'].label_from_instance = lambda obj: obj.address
         self.fields['consumer'].label_from_instance = lambda obj: obj.name
 
 
@@ -44,6 +75,3 @@ class MeterForm(forms.ModelForm):
         fields = '__all__'
     series = forms.CharField(required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['apartment_number'].label_from_instance = lambda obj: obj.apartment_nr

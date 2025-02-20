@@ -57,6 +57,8 @@ def __init__(self, *args, **kwargs):
     self.fields['apartment_number'].label_from_instance = lambda obj: obj.apartment_nr
     # 'apartment_number' is a field in current model
 
+# ------------------------------------------------------------------------------------------------------------------
+
 
 # for regex
 allowed_symbols = r"""'.', ',', ';', ':', '...', '!', '?', '-', '(', ')', '"', ''', '..', '&', '@', '%', '+', '='"""
@@ -67,11 +69,8 @@ def is_valid_string(s):
     return bool(re.match(pattern, s))
 
 
+# objects = SomeModel.objects.all()
 def manage_db_table(objects):
     for obj in objects:
         # print(obj.name) # prints object's field
         obj.delete()
-
-
-# def get_object_field_by_key(key):
-

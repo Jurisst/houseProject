@@ -1,12 +1,12 @@
 
 {% extends 'base.html' %}
-{% block title %} Add service {% endblock %}
+{% block title %} Add provider {% endblock %}
 {% block sidebar %}
 <aside class="vertical-menu">
     {% if house.id %}
-        <a href="{% url 'services_by_house' house.id %}">Back to house's services</a>
+        <a href="{% url 'providers_by_house' house.id %}">Back to house's providers</a>
     {% else %}
-        <a href="{% url 'services' %}">Back to services</a>
+        <a href="{% url 'providers' %}">Back to providers</a>
     {% endif %}
     <a href="#">Profile</a>
     <a href="#">Settings</a>
@@ -17,12 +17,12 @@
 <form method="post">
   {% csrf_token %}
     {% if house %}
-    <h1>Add Service for {{ house }}</h1>
+    <h1>Add Provider for {{ house }}</h1>>
     {% else %}
-    <h1>Add New service</h1>
+    <h1>Add New provider</h1>>
     {% endif %}
   {{ form.as_p }}
-  <button type="submit">Add Service</button>
+  <button type="submit">Add Provider</button>
 </form>
   {% if err %}
     <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
