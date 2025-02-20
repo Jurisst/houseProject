@@ -81,10 +81,10 @@ class Consumer(models.Model):
 class Apartment(models.Model):
     address = models.ForeignKey(House, on_delete=models.CASCADE)
     apartment_nr = models.IntegerField(validators=[MinValueValidator(1, 'Must be at least 1')])
-    area = models.IntegerField(validators=[MinValueValidator(1, 'Must be at least 1')])
-    wm_count = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
-    hm_count = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
-    person_count = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
+    area = models.IntegerField("Area of apartment", validators=[MinValueValidator(1, 'Must be at least 1')])
+    wm_count = models.IntegerField("Count of water meters", validators=[MinValueValidator(0, 'Can not be negative number')])
+    hm_count = models.IntegerField("Count of heat meters", validators=[MinValueValidator(0, 'Can not be negative number')])
+    person_count = models.IntegerField("Count of persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, default='')
     contract_nr = models.CharField(null=True, max_length=50, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
 
@@ -94,19 +94,19 @@ class Apartment(models.Model):
 
 
 class Meter(models.Model):
-    CHOICES = [('Cold water', 'cold'), ('Hot water', 'hot'), ('Heat', 'heat'), ('Other', 'other')]
-    type = models.CharField(max_length=10, choices=CHOICES)
-    manufacturer = models.CharField(default=" ", max_length=30, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
-    series = models.CharField(default=" ", max_length=5)
-    number = models.CharField(max_length=10, validators=[
+    CHOICES = [('cold', 'Cold water'), ('electricity', 'Electricity'), ('hot', 'Hot water'), ('heat', 'Heat'), ('other', 'Other')]
+    type = models.CharField('Type of meter', max_length=15, choices=CHOICES)
+    manufacturer = models.CharField('Manufacturer', default=" ", max_length=30, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
+    series = models.CharField('Series (if applicable)', default=" ", max_length=5)
+    number = models.CharField('Meter number', max_length=10, validators=[
         MinLengthValidator(2, 'Must be at least 2 digits'),
         valid_meter_nr
     ])
     # number = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
-    reading_default = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
+    reading_default = models.IntegerField('Default reading (on installation)', validators=[MinValueValidator(0, 'Can not be negative number')])
     verification_date = models.DateField("Verification date", default=date.today)
-    address = models.ForeignKey(House, on_delete=models.PROTECT, default='')
-    apartment_number = models.ForeignKey(Apartment, on_delete=models.PROTECT)
+    address = models.ForeignKey(House, on_delete=models.PROTECT, verbose_name='House address')
+    apartment_number = models.ForeignKey(Apartment, on_delete=models.PROTECT, default='', verbose_name='Apartment number')
 
     def __str__(self):
         return str(self.manufacturer) + '  ' + self.series + ' ' + self.number

@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (HouseListView, HouseUpdateView, ProviderListView, ProviderUpdateView,
                     ServiceListView, ServiceUpdateView, ApartmentListView, ApartmentUpdateView,
                     MeterListView, MeterUpdateView, ConsumerListView, ConsumerUpdateView,
-                    houses_apartments, houses_services, add_apartment_to_house, add_meter_to_apartment)
+                    houses_apartments, houses_services, add_apartment_to_house, add_meter_to_apartment,
+                    meters_by_apartment)
 from . import views
 
 urlpatterns = [
@@ -28,7 +29,7 @@ urlpatterns = [
     path('success_house/<int:house_id>/', views.success_add_house, name='success_house'),
     path('success_consumer/<int:consumer_id>/', views.success_add_consumer, name='success_consumer'),
     path('success_apartment/<int:house_id>/<int:apartment_id>/', views.success_add_apartment, name='success_apartment'),
-    path('success_meter/<int:meter_id>/', views.success_add_meter, name='success_meter'),
+    path('success_meter/<int:meter_id>/<int:apartment_id>/', views.success_add_meter, name='success_meter'),
 
     # update objects
     path("houses/update_house/<slug:pk>/", HouseUpdateView.as_view(), name='house_update'),
@@ -48,5 +49,6 @@ urlpatterns = [
     path('houses/<int:house_id>/add_service', views.add_service_to_house, name='add_service_here'),
 
     path('apartment/<int:apartment_id>/add-meter/', views.add_meter_to_apartment, name='add_meter_to_apartment'),
+    path('apartment/<int:apartment_id>/meters/', meters_by_apartment, name='meters_by_apartment'),
 
 ]

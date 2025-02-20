@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %} Add meter {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if apartment %}
+
+    <a href="{% url 'add_meter_to_apartment' apartment.id %}">Add another meter</a>
+    <a href="{% url 'meters_by_apartment' apartment.id %}">Back to meters</a>
+        <a href="{% url 'apartments' %}">Back to apartments</a>
+    {% endif %}
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+    {% if apartment %}
+        <h2>Add Meter to {{ apartment.address }}, apartment {{ apartment.apartment_nr }}</h2>
+    {% else %}
+        <h2>Add New Meter</h2>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Meter</button>
+    </form>
+
+    {% if err %}
+        {{ err|safe }}
+    {% endif %}
+{% endblock %} 

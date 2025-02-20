@@ -75,3 +75,18 @@ class MeterForm(forms.ModelForm):
         fields = '__all__'
     series = forms.CharField(required=False)
 
+
+class MeterForm2(forms.ModelForm):
+    class Meta:
+        model = Meter
+        fields = '__all__'
+    
+    series = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'address' in self.fields:
+            self.fields['address'].widget = forms.HiddenInput()
+        if 'apartment_number' in self.fields:
+            self.fields['apartment_number'].widget = forms.HiddenInput()
+

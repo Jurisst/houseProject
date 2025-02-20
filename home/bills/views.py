@@ -2,7 +2,7 @@ from django.views.decorators.cache import cache_control
 from django.views.generic import ListView, UpdateView
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect,  get_object_or_404
-from .forms import ProviderForm, ServiceForm, HouseForm, ConsumerForm, ApartmentForm, MeterForm, ApartmentForm2, ServiceForm2
+from .forms import ProviderForm, ServiceForm, HouseForm, ConsumerForm, ApartmentForm, MeterForm, ApartmentForm2, ServiceForm2, MeterForm2
 from .models import Provider, Service, House, Consumer, Apartment, Meter
 from .help_functions import manage_db_table
 from django.http import JsonResponse
@@ -101,6 +101,7 @@ class ApartmentUpdateView(UpdateView):
     model = Apartment
     fields = '__all__'
     template_name_suffix = "_update_form"
+    context_object_name = 'apartment'
 
     def get_success_url(self):
         return reverse_lazy('apartments')
@@ -348,10 +349,10 @@ def add_apartment_to_house(request, house_id):
 def add_meter(request):
     meters = Meter.objects.all()
     meters_list = []
-    for meter in meters:
+
+    for meter in selection:
         manufacturer_and_number = meter.manufacturer, meter.series, meter.number
         meters_list.append(manufacturer_and_number)
-        print(meters_list)
     text = None
     if request.method == 'POST':
         form = MeterForm(request.POST)
@@ -366,9 +367,9 @@ def add_meter(request):
         form = MeterForm()
     if text:
         err = f'<html><body><b> {text} </b></body>'
-        return render(request, 'add_meter.html', {'form': form, 'err': err})
+        return render(request, 'bills/add_meter.html', {'form': form, 'err': err})
     else:
-        return render(request, 'add_meter.html', {'form': form})
+        return render(request, 'bills/add_meter.html', {'form': form})
 
 
 def houses_apartments(request, house_id):
@@ -385,8 +386,9 @@ def houses_services(request, house_id):
 
 def add_meter_to_apartment(request, apartment_id):
     apartment = get_object_or_404(Apartment, id=apartment_id)
-    meters = Meter.objects.filter(apartment=apartment.id)
-    
+    meters = Meter.objects.filter(apartment_number=apartment.id)
+    house = get_object_or_404(House, id=apartment.address.id)
+
     apartment_meters_list = []
     for meter in meters:
         meter_info = (meter.manufacturer, meter.series, meter.number)
@@ -394,7 +396,7 @@ def add_meter_to_apartment(request, apartment_id):
     
     text = None
     if request.method == 'POST':
-        form = MeterForm(request.POST)
+        form = MeterForm2(request.POST)
         if form.is_valid():
             meter_info = (form['manufacturer'].value(), form['series'].value(), form['number'].value())
             if meter_info in apartment_meters_list:
@@ -405,11 +407,22 @@ def add_meter_to_apartment(request, apartment_id):
                 meter.save()
                 return redirect('success_meter', apartment_id=apartment.id, meter_id=meter.id)
     else:
-        form = MeterForm(initial={'apartment': apartment})
+        form = MeterForm2(initial={'apartment_number': apartment, 'address': house})
 
     if text:
         err = f'<html><body><b> {text} </b></body>'
-        return render(request, 'bills/add_meter.html', {'form': form, 'err': err, 'apartment': apartment})
+        return render(request, 'bills/add_meter.html', {'form': form, 'err': err, 'apartment': apartment, 'house': house})
     else:
         return render(request, 'bills/add_meter.html', {'form': form, 'apartment': apartment})
+
+
+def meters_by_apartment(request, apartment_id):
+    apartment = get_object_or_404(Apartment, id=apartment_id)
+    apartment_meters = Meter.objects.filter(apartment_number=apartment.id)
+    
+    context = {
+        'apartment': apartment,
+        'apartment_meters': apartment_meters,
+    }
+    return render(request, 'bills/meters_by_apartment.html', context)
 
