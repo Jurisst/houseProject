@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if apartment %}
+        <h2>Add Meter to Apartment {{ apartment.apartment_nr }}</h2>
+    {% else %}
+        <h2>Add New Meter</h2>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Meter</button>
+    </form>
+
+    {% if err %}
+        {{ err|safe }}
+    {% endif %}
+{% endblock %} 

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %} Add apartment {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if house.id %}
+        <a href="{% url 'apartments_by_house' house.id %}">Back to house's apartments</a>
+    {% else %}
+        <a href="{% url 'apartments' %}">Back to apartments</a>
+    {% endif %}
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+    {% if house %}
+    <h1>Add Apartment for {{ house }}</h1>
+    {% else %}
+    <h1>Add New apartment</h1>
+    {% endif %}
+  {{ form.as_p }}
+  <button type="submit">Add Apartment</button>
+</form>
+  {% if err %}
+    <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
+  {% endif %}
+{% endblock %}
