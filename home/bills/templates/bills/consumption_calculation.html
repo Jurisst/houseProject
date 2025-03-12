@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load month_filters %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if house %}
+        <a href="{% url 'add_incoming' house.id %}">Add incoming bill</a>
+        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
+        <a href="{% url 'house_update' house.id %}">Back to house</a>
+    {% else %}
+        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
+    {% endif %}
+    <a href="{% url 'index' %}">Back to start</a>
+    
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">{% translate "Consumption Calculation" %} - {{ house.address }}</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="month" class="form-label">{% translate "Month" %}</label>
+                    <select name="month" id="month" class="form-select">
+                        {% for month_num in months %}
+                            <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                                {{ month_num }} 
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="year" class="form-label">{% translate "Year" %}</label>
+                    <select name="year" id="year" class="form-select">
+                        {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">{% translate "Calculate" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if consumption_data %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>{% translate "Apartment" %}</th>
+                    <th>{% translate "Meter" %}</th>
+                    <th>{% translate "Previous Reading" %}</th>
+                    <th>{% translate "Current Reading" %}</th>
+                    <th>{% translate "Consumption" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in consumption_data %}
+                <tr>
+                    <td>{{ item.apartment.apartment_nr }}</td>
+                    <td>{{ item.meter }}</td>
+                    <td>{{ item.previous_date|date:"Y-m-d" }} - {{ item.previous_value }}</td>
+                    <td>{{ item.current_date|date:"Y-m-d" }} - {{ item.current_value }}</td>
+                    <td>{{ item.consumption|floatformat:3 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        {% translate "No consumption data available for the selected period." %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -11,11 +11,22 @@
 
 
     <nav class="horizontal-menu">
-        <a href="{% url 'index' %}">Home</a>
-        <a href="#">Bills</a>
-        <a href="{% url 'providers' %}">Providers</a>
-        <a href="#">Documents</a>
-        <a href="#">Contact helpdesk</a>
+        <div class="nav-left">
+            <a class="nav-item nav-link" href="{% url 'index' %}">Home</a>
+            {% if user.is_superuser %}
+            <a class="nav-item nav-link" href="{% url 'items' %}">Items</a>
+            {% endif %}
+            <a href="#">Documents</a>
+            <a href="#">Contact helpdesk</a>
+        </div>
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <span class="nav-item nav-link">Welcome, {{ user.username }}</span>
+                <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </div>
     </nav>
     <div class="content-wrapper">
         <!-- Sidebar (This will change per page) -->

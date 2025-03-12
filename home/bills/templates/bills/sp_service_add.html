@@ -4,8 +4,13 @@
 
 {% block sidebar %}
 <aside class="vertical-menu">
-<a href="{% url 'add_service_here' house_id %}">Add another service</a>
-<a href="{% url 'services_by_house' house_id %}">Back to services</a>
+    {% if house.id %}
+        <a href="{% url 'add_service_here' house.id %}">Add another service</a>
+        <a href="{% url 'services_by_house' house.id %}">Back to services</a>
+    {% else %}
+        <a href="{% url 'add_service' %}">Add service</a>
+        <a href="{% url 'services' %}">Back to services</a>
+    {% endif %}
 </aside>
 {% endblock %}
 

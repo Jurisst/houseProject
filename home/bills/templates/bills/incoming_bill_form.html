@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add incoming bill{% endblock %}
+
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if house %}
+        <a href="{% url 'incoming_bills' house.id %}">Incoming bills here</a>
+    {% else %}
+        <a href="{% url 'incoming_bills' %}">Incoming bills here</a>
+    {% endif %}
+    <a href="{% url 'index' %}">Back to start</a>
+</aside>
+{% endblock %}
+{% block content %}
+{% if house %}
+    <h1>Add incoming bill for {{ house.address }}</h1>
+{% else %}
+    <h1>Add incoming bill</h1>
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Add Incoming bill</button>
+</form>
+  {% if err %}
+    <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
+  {% endif %}
+
+{% endblock %} 
