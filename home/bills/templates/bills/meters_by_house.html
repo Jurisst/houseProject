@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Meters in {{ house.address }}</h2>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Apartment</th>
+                <th>Manufacturer</th>
+                <th>Series</th>
+                <th>Number</th>
+                <th>Service Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meter in house_meters %}
+                <tr>
+                    <td>{{ meter.apartment_number.apartment_nr }}</td>
+                    <td>{{ meter.manufacturer }}</td>
+                    <td>{{ meter.series }}</td>
+                    <td>{{ meter.number }}</td>
+                    <td>{{ meter.type }}</td>
+                    <td>{{ meter.verification_date }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No meters found for this house.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'house_update' house.id %}" class="btn btn-primary">Back to House</a>
+{% endblock %} 

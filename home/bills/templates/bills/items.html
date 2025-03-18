@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+
+{% block title %} Welcome {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'providers' %}">Providers</a>
+    <a href="{% url 'services' %}">Services</a>
+    <a href="{% url 'houses' %}">Houses</a>
+    <a href="{% url 'apartments' %}">Apartments</a>
+    <a href="{% url 'consumers' %}">Consumers</a>
+    <a href="{% url 'meters' %}">Meters</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to the Home Page</h1>
+<p>This is the main content for the home page.</p>
+{% endblock %}

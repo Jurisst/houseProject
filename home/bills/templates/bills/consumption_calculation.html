@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">{% translate "Consumption Calculation" %} - {{ house.address }}</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="month" class="form-label">{% translate "Month" %}</label>
+                    <select name="month" id="month" class="form-select">
+                        {% for i in "123456789101112"|make_list %}
+                        <option value="{{ i }}" {% if i|add:"0" == selected_month %}selected{% endif %}>
+                            {{ i|add:"0"|date:"F" }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="year" class="form-label">{% translate "Year" %}</label>
+                    <select name="year" id="year" class="form-select">
+                        {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">{% translate "Calculate" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if consumption_data %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>{% translate "Apartment" %}</th>
+                    <th>{% translate "Meter" %}</th>
+                    <th>{% translate "Previous Reading" %}</th>
+                    <th>{% translate "Current Reading" %}</th>
+                    <th>{% translate "Consumption" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in consumption_data %}
+                <tr>
+                    <td>{{ item.apartment.apartment_nr }}</td>
+                    <td>{{ item.meter }}</td>
+                    <td>{{ item.previous_date|date:"Y-m-d" }} - {{ item.previous_value }}</td>
+                    <td>{{ item.current_date|date:"Y-m-d" }} - {{ item.current_value }}</td>
+                    <td>{{ item.consumption|floatformat:3 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        {% translate "No consumption data available for the selected period." %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

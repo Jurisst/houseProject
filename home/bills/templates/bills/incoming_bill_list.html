@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Incoming Bills</h2>
+    
+    {% if incoming_bills %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Period</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in incoming_bills %}
+                    <tr>
+                        <td>{{ bill.service }}</td>
+                        <td>{{ bill.period }}</td>
+                        <td>${{ bill.amount|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'incoming_bill_update' bill.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No incoming bills found.</p>
+    {% endif %}
+</div>
+{% endblock %} 
