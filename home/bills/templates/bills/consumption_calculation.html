@@ -1,6 +1,23 @@
 {% extends 'base.html' %}
 {% load i18n %}
-
+{% load static %}
+{% load month_filters %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if house %}
+        <a href="{% url 'add_incoming' house.id %}">Add incoming bill</a>
+        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
+        <a href="{% url 'house_update' house.id %}">Back to house</a>
+    {% else %}
+        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
+    {% endif %}
+    <a href="{% url 'index' %}">Back to start</a>
+    
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
 {% block content %}
 <div class="container py-4">
     <h2 class="mb-4">{% translate "Consumption Calculation" %} - {{ house.address }}</h2>
@@ -11,10 +28,10 @@
                 <div class="col-md-4">
                     <label for="month" class="form-label">{% translate "Month" %}</label>
                     <select name="month" id="month" class="form-select">
-                        {% for i in "123456789101112"|make_list %}
-                        <option value="{{ i }}" {% if i|add:"0" == selected_month %}selected{% endif %}>
-                            {{ i|add:"0"|date:"F" }}
-                        </option>
+                        {% for month_num in months %}
+                            <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                                {{ month_num }} 
+                            </option>
                         {% endfor %}
                     </select>
                 </div>

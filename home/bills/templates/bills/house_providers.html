@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {{ house.address }} - Providers
+{% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'apartments_by_house' house.id %}">Apartments</a>
+    <a href="{% url 'services_by_house' house.id %}">Services</a>
+    <a href="{% url 'meters_by_house' house.id %}">Meters</a>
+    <a href="{% url 'house_update' house.id %}">Back to house</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">{% translate "Service Providers" %} - {{ house.address }}</h2>
+
+    {% if providers %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% translate "Provider Name" %}</th>
+                        <th>{% translate "Business Form" %}</th>
+                        <th>{% translate "Registration Number" %}</th>
+                        <th>{% translate "Bank Account" %}</th>
+                        <th>{% translate "Services" %}</th>
+                        <th>{% translate "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for provider in providers %}
+                    <tr>
+                        <td>{{ provider.name }}</td>
+                        <td>{{ provider.business_form }}</td>
+                        <td>{{ provider.reg_number }}</td>
+                        <td>{{ provider.account }}</td>
+                        <td>
+                            {% for service in provider.service_set.all %}
+                                {% if service.house == house %}
+                                    <span class="badge bg-info">{{ service.get_name_display }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    {% translate "View Details" %}
+                                </a>
+                                <a href="{% url 'provider_update' provider.id %}" class="btn btn-sm btn-outline-secondary">
+                                    {% translate "Edit" %}
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            {% translate "No providers found for this house." %}
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'add_provider' %}" class="btn btn-primary">
+            {% translate "Add New Provider" %}
+        </a>
+    </div>
+</div>
+{% endblock %} 

@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 {% load i18n %}
-
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'add_meter_reading' meter.id %}">Add Reading</a>
+    <a href="{% url 'meters_by_apartment' apartment.id %}">Back to Apartment Meters</a>
+    {% if house %}
+        <a href="{% url 'meters_by_house' house.id %}">Back to House Meters</a>
+    {% endif %}
+    <a href="{% url 'index' %}">Back to Start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}      
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -8,6 +20,9 @@
         <div>
             <a href="{% url 'add_meter_reading' meter.id %}" class="btn btn-primary">
                 {% translate "Add Reading" %}
+            </a>
+            <a href="{% url 'meters_by_apartment' apartment.id %}" class="btn btn-primary">
+                {% translate "Back to all meters" %}
             </a>
         </div>
     </div>
@@ -33,7 +48,6 @@
                 <tr>
                     <th>{% translate "Date" %}</th>
                     <th>{% translate "Reading Value" %}</th>
-                    <th>{% translate "Status" %}</th>
                     <th>{% translate "Created" %}</th>
                 </tr>
             </thead>
@@ -42,13 +56,6 @@
                 <tr>
                     <td>{{ reading.reading_date|date:"Y-m-d" }}</td>
                     <td>{{ reading.reading_value|floatformat:3 }}</td>
-                    <td>
-                        {% if reading.is_verified %}
-                        <span class="badge bg-success">{% translate "Verified" %}</span>
-                        {% else %}
-                        <span class="badge bg-warning">{% translate "Pending" %}</span>
-                        {% endif %}
-                    </td>
                     <td>{{ reading.created_at|date:"Y-m-d H:i" }}</td>
                 </tr>
                 {% endfor %}

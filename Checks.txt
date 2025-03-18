@@ -1,7 +1,42 @@
-List Views: add Back to main (sidebar link position 2)
-Apartments list: order by Desc or remove?
-Meters update: apartments number without address - add address or create link only for apartment id?
-Update Views: add To main page (sidebar link position 3)
-houses/meters for house (sidebar link + url/view/template)
-apartments/meters for apartment (sidebar link + url/view/template)/meter fields to template?
-New model Reading
+List Views: add Back to main (sidebar link position 2) - DONE
+_________________________________________________________________
+
+Apartments list: order by Desc - DONE
+_________________________________________________________________
+
+Meters update: apartments number without address - add address - DONE
+_________________________________________________________________
+
+Update Views: add To main page (sidebar link position 3) - DONE
+__________________________________________________________________
+
+houses/apartments for house (sidebar link + url/view/template)
+READY, NEEDS TO BE REPLICATED TO OTHER URLS, VIEWS, TEMPLATES - DONE
+_________________________________________________________________________
+
+apartments/meters for apartment (sidebar link + url/view/template)/meter fields to template? - DONE
+_________________________________________________________________________
+model Meters:
+
+new fields
+cold_wm_count
+hot_wm_count
+
+def add_meter_to_apartment(request, apartment_id):
+validations for meters count:
+hot
+cold
+heat - DONE
+____________________________________________________________________________________
+
+ALL templates sidebar - DONE
+
+
+
+
+IncomingBill
+def str () house service month
+
+
+Service
+def str add address + name

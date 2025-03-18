@@ -1,0 +1,21 @@
+.horizontal-menu {
+    display: flex;
+    justify-content: space-between;  /* This spreads out the nav groups */
+    align-items: center;
+    /* ... your existing horizontal-menu styles ... */
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+}
+
+/* The left group of links */
+.navbar-nav:first-child {
+    margin-right: auto;  /* Pushes this to the left */
+}
+
+/* The right group of links */
+.navbar-nav:last-child {
+    margin-left: auto;  /* Pushes this to the right */
+} 

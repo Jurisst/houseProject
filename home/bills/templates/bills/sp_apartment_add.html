@@ -6,7 +6,7 @@
 <aside class="vertical-menu">
 <a href="{% url 'add_apartment_here' house_id %}">Add another apartment</a>
 <a href="{% url 'apartments_by_house' house_id %}">Back to apartments</a>
-<a href='/bills/apartments' >Back to apartments</a>
+<a href='{% url "index" %}' >Back to start</a>
 </aside>
 {% endblock %}
 

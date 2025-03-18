@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'incoming_bills' bill.house.id %}">Back to Bills</a>
+    <a href="{% url 'house_update' bill.house.id %}">Back to House</a>
+    <a href="{% url 'index' %}">Back to Start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Incoming Bill Details</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Bill for {{ bill.house.address }}</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Provider:</strong> {{ bill.provider }}</p>
+                    <p><strong>Service:</strong> {{ bill.service }}</p>
+                    <p><strong>Period:</strong> {{ bill.period }}</p>
+                    <p><strong>Amount:</strong> €{{ bill.amount }}</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                {% if bill.house.id %}
+                    <a href="{% url 'incoming_bill_update' bill.pk %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'services_by_house' bill.house.id %}" class="btn btn-secondary">Back to House Services</a>
+                {% else %}
+                    <a href="{% url 'items' %}" class="btn btn-primary">Items</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

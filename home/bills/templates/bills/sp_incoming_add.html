@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %} Incoming bill added {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+<a href="{% url 'add_incoming' house %}">Add another bill</a>
+<a href="{% url 'incoming_bills' house %}">Back to bills</a>
+<a href="{% url 'house_update' house %}">Back to house</a>
+</aside>
+{% endblock %}
+{% block content %}
+<h1>Success!</h1>
+<p>Bill has been saved</p>
+{% endblock %}
+

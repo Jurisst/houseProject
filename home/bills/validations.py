@@ -1,7 +1,6 @@
 import re
 from django.core.exceptions import ValidationError
 
-
 def valid_provider_name(form_input):
     form_input = form_input.strip()
     allowed_symbols = r"""'.', ',', ';', ':', '...', '!', '?', '-', '(', ')', '"', ''', '..', '&', '@', '%', '+', '='"""
@@ -28,3 +27,23 @@ def valid_meter_nr(form_input):
         form_input = int(form_input)
     except ValueError:
         raise ValidationError("Must be a number")
+
+
+def invalid_meters_count(form, meters, apartment):
+    meter_type = form.cleaned_data['type']
+    dynamic_field = f"{meter_type}_meters_count"
+    current_meters_count = meters.filter(
+        apartment_number=apartment,
+        type=meter_type
+    ).count()
+    print('current count:' + str(current_meters_count))
+
+    if hasattr(apartment, dynamic_field):
+        value = getattr(apartment, dynamic_field)
+        print('dynamic ' + str(value))
+        if current_meters_count >= value:
+            text = f'Cannot add meters of this type. Allowed for apartment: {getattr(apartment, dynamic_field)}'
+            print(text)
+            return text
+        else:
+            pass

@@ -4,11 +4,13 @@
 
 {% block sidebar %}
 <aside class="vertical-menu">
-
-<a href="{% url 'add_meter_to_apartment' apartment.id %}">Add another meter</a>
-<a href="{% url 'meters_by_apartment' apartment.id %}">Back to meters</a>
-<a href="{% url 'apartments_by_house' apartment.address.id %}">Back to apartments</a>
-
+    {% if apartment.id %}
+        <a href="{% url 'add_meter_to_apartment' apartment.id %}">Add another meter</a>
+        <a href="{% url 'meters_by_apartment' apartment.id %}">Back to meters</a>
+        <a href="{% url 'apartments_by_house' apartment.address.id %}">Back to apartments</a>
+    {% else %}
+        <a href="{% url 'index'  %}">Back to home</a>
+    {% endif %}
 </aside>
 {% endblock %}
 

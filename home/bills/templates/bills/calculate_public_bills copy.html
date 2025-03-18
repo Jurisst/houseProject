@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %} Public Bills Calculation {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+   <a href="{% url 'incoming_bills' house.id %}">Incoming bills here</a>
+   <a href="{% url 'services_by_house' house.id %}">Services here</a>
+   <a href="{% url 'house_update' house.id %}">Back to house</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Public Bills Calculation for {{ house.address }}</h2>
+
+    <!-- Period selection form -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <select name="month" class="form-control">
+                    {% for month in months %}
+                        <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>
+                            {{ month }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="year" class="form-control">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Show Bills</button>
+            </div>
+        </div>
+    </form>
+
+    <h4>Period: {{ selected_year }}-{{ selected_month }}</h4>
+
+    {% if apartment_bills %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Apartment</th>
+                        <th>Service Positions</th>
+                        <!-- <th>Quantity</th> -->
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apartment, bills in apartment_bills.items %}
+                        <tr>
+                            <td>{{ apartment }}</td>
+                            <td>
+                                {% for position in bills.positions %}
+                                    <div>{{ position.service }} {{ position.amount }} EUR</div>
+                                {% endfor %}
+                            </td>
+                            <!-- <td>
+                                {% for position in bills.positions %}
+                                    <div>{{ position.quantity }}</div>
+                                {% endfor %}
+                            </td> -->
+                            <td>
+                                <!-- {% for position in bills.positions %}
+                                    <div>{{ position.amount }} EUR</div>
+                                {% endfor %}
+                                <hr> -->
+                                <strong>Total: {{ bills.total }} EUR</strong>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No public bills found for this period.</p>
+    {% endif %}
+    
+    <a href="{% url 'services_by_house' house.id %}" class="btn btn-secondary">Back to Services</a>
+</div>
+{% endblock %} 

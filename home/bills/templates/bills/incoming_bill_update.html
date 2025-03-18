@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'incoming_bill_detail' bill.id %}">Back to Bill Details</a>
+    <a href="{% url 'incoming_bills' house.id %}">Back to Bills</a>
+    <a href="{% url 'house_update' house.id %}">Back to House</a>
+    <a href="{% url 'index' %}">Back to Start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Update Incoming Bill</h2>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="{% url 'incoming_bill_detail' bill.pk %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'house_update' house.id %}">Back to house</a>
+    <a href="{% url 'apartments_by_house' house.id %}">Back to house apartments</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
+
 {% block content %}
     <h2>Meters in {{ house.address }}</h2>
     
@@ -11,6 +23,8 @@
                 <th>Series</th>
                 <th>Number</th>
                 <th>Service Type</th>
+                <th>Verification Date</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -22,10 +36,14 @@
                     <td>{{ meter.number }}</td>
                     <td>{{ meter.type }}</td>
                     <td>{{ meter.verification_date }}</td>
+                    <td>
+                        <a href="{% url 'add_meter_reading' meter_id=meter.id house_id=house.id %}" class="btn btn-sm btn-primary">Add Reading</a>
+                        <a href="{% url 'meters_by_apartment' apartment_id=meter.apartment_number.id %}" class="btn btn-sm btn-info">View Apartment Meters</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5">No meters found for this house.</td>
+                    <td colspan="7">No meters found for this house.</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -8,11 +8,7 @@
     <a href="{% url 'house_update' house.id %}">Back to house</a>
     <a href="{% url 'add_apartment_here' house.id %}">Add Apartment here</a>
     <a href="{% url 'add_service_here' house.id %}">Add Service here</a>
-    <a href="{% url 'add_house' %}">Add House</a>
-    <a href="{% url 'add_apartment' %}">Add Apartment</a>
-    <a href="{% url 'add_consumer' %}">Add Consumer</a>
-    <a href="{% url 'add_meter' %}">Add Meter</a>
-
+    <a href="{% url 'index' %}">Back to start</a>
     <a href="#">Profile</a>
     <a href="#">Settings</a>
     <a href="#">Logout</a>
@@ -24,7 +20,7 @@
 <ul>
     {% for item in house_apartments %}
       <li>
-          <a href="{% url 'apartment_update' item.pk %}">{{ item }}</a>
+          <a href="{% url 'apartment_update' house.id item.pk %}">{{ item }}</a>
       </li>
     {% empty %}
             <li>No products found in this category.</li>

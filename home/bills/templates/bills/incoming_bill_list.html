@@ -1,5 +1,21 @@
 {% extends 'base.html' %}
-
+{% block title %} Incoming bills {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    {% if house %}
+        <a href="{% url 'add_incoming' house.id %}">Add incoming bill</a>
+        <a href="{% url 'calculate_public_bills' house.id %}">Calculate public bills</a>
+        <a href="{% url 'house_update' house.id %}">Back to house</a>
+    {% else %}
+        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
+    {% endif %}
+    <a href="{% url 'index' %}">Back to start</a>
+    
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <h2>Incoming Bills</h2>
@@ -19,7 +35,7 @@
                     <tr>
                         <td>{{ bill.service }}</td>
                         <td>{{ bill.period }}</td>
-                        <td>${{ bill.amount|floatformat:2 }}</td>
+                        <td>€{{ bill.amount|floatformat:2 }}</td>
                         <td>
                             <a href="{% url 'incoming_bill_update' bill.pk %}" class="btn btn-sm btn-primary">Edit</a>
                         </td>
@@ -28,7 +44,11 @@
             </tbody>
         </table>
     {% else %}
+    {% if house %}
+        <p>No incoming bills found for {{ house.address }}.</p>
+    {% else %}
         <p>No incoming bills found.</p>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %} 

@@ -1,13 +1,13 @@
-
 {% extends 'base.html' %}
 
-    {% block title %} Update serviceS {% endblock %}
+    {% block title %} Update service {% endblock %}
 
     {% block sidebar %}
     <aside class="vertical-menu">
-        <a href="{% url 'add_service' %}">Add new service</a>
-        <a href="{% url 'services' %}">Back</a>
-        <a href="{% url 'index' %}">Back to start</a>
+        <a href="{% url 'add_service_here' house.id %}">Add new service</a>
+        <a href="{% url 'services_by_house' house.id %}">Back to House Services</a>
+        <a href="{% url 'house_update' house.id %}">Back to House</a>
+        <a href="{% url 'index' %}">Back to Start</a>
         <a href="#">Profile</a>
         <a href="#">Settings</a>
         <a href="#">Logout</a>
@@ -15,7 +15,7 @@
     {% endblock %}
 
     {% block content %}
-    <h2>Update service info</h2>
+    <h2>Update service info for {{ house.address }}</h2>
 
     <form method="post">
       {% csrf_token %}
