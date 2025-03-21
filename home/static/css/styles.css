@@ -1,10 +1,42 @@
-.horizontal-menu {
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
     display: flex;
-    justify-content: space-between;  /* This spreads out the nav groups */
-    align-items: center;
-    /* ... your existing horizontal-menu styles ... */
+    flex-direction: column;
 }
 
+/* Horizontal Menu */
+.horizontal-menu {
+    background-color: #333;
+    color: white;
+    display: flex;
+    padding: 20px;
+    margin: 0;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left {
+    display: flex;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.horizontal-menu a {
+    color: white;
+    padding: 20px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.horizontal-menu a:hover {
+    background-color: #575757;
+}
+
+        
 .navbar-nav {
     display: flex;
     align-items: center;
@@ -19,3 +51,96 @@
 .navbar-nav:last-child {
     margin-left: auto;  /* Pushes this to the right */
 } 
+
+/* Layout */
+.content-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+/* Vertical Menu */
+.vertical-menu {
+    width: 200px;
+    background-color: #f4f4f4;
+    padding: 0;
+    margin: 0;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 50px);
+}
+
+.vertical-menu a {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+}
+
+.vertical-menu a:hover {
+    background-color: #e0e0e0;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Form Styling */
+.form-container {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-container input,
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.form-container input:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+    border-color: #666;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.form-container button {
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #575757;
+}

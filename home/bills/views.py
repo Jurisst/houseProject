@@ -40,7 +40,7 @@ from django.conf import settings
 
 # Register Arial Unicode MS font
 FONT_PATH = os.path.join(settings.BASE_DIR, 'static', 'fonts')
-pdfmetrics.registerFont(TTFont('ArialUnicode', os.path.join(FONT_PATH, 'arial-unicode-ms.ttf')))
+pdfmetrics.registerFont(TTFont('ArialUnicode', os.path.join(FONT_PATH, 'arial-unicode-ms.TTF')))
 
 SERVICE_TO_METER_TYPE = {
     'cold_water': 'cold',
@@ -64,60 +64,6 @@ def items(request):
         return render(request, 'bills/items.html')
     else:
         return render(request, 'bills/index.html')
-from datetime import datetime
-from .validations import invalid_meters_count
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db.models import F, Window, Sum
-from django.db.models.functions import Lead, Lag
-from django.utils.translation import gettext as _
-from django.views.decorators.http import require_http_methods
-from django.core.exceptions import ValidationError
-import calendar
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from django.db.utils import IntegrityError
-from django.http import HttpResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase.pdfmetrics import registerFontFamily
-from reportlab.lib.fonts import addMapping
-import os
-from django.conf import settings
-
-# Register Arial Unicode MS font
-FONT_PATH = os.path.join(settings.BASE_DIR, 'static', 'fonts')
-pdfmetrics.registerFont(TTFont('ArialUnicode', os.path.join(FONT_PATH, 'arial-unicode-ms.ttf')))
-
-SERVICE_TO_METER_TYPE = {
-    'cold_water': 'cold',
-    'hot_water': 'hot',
-    'electricity': 'electricity',
-    'heat': 'heat',
-    'other': 'other'
-}
-
-@login_required
-def index(request, user_id=None):
-    if user_id:
-        user = get_object_or_404(User, id=user_id)
-        return render(request, 'bills/index.html', {'user': user})
-    else:
-        return render(request, 'bills/index.html')
-
-@login_required
-def items(request):
-    if request.user.is_superuser:
-        return render(request, 'bills/items.html')
-    else:
-        return render(request, 'bills/index.html')
-
 
 def success_add_provider(request, provider_id):
     provider = get_object_or_404(Provider, id=provider_id)

@@ -37,7 +37,24 @@ class HouseForm(forms.ModelForm):
     class Meta:
         model = House
         fields = '__all__'
-    area_total = forms.IntegerField(required=False)
+        widgets = {
+            'area_of_apartments_total': forms.NumberInput(attrs={'readonly': 'readonly'})
+        }
+        help_texts = {
+            'area_of_apartments_total': _('This field is automatically calculated from apartment areas')
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['area_of_apartments_total'].required = False
+        if not self.instance.pk:
+            self.fields['area_of_apartments_total'].initial = 0
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'area_of_apartments_total' not in cleaned_data or cleaned_data['area_of_apartments_total'] is None:
+            cleaned_data['area_of_apartments_total'] = 0
+        return cleaned_data
 
 
 class ConsumerForm(forms.ModelForm):
@@ -131,7 +148,7 @@ class IncomingBillForm2(forms.ModelForm):
             self.fields['service'].queryset = Service.objects.filter(house=self.instance.house)
         
         # Add this to show verbose name in dropdown
-        self.fields['service'].label_from_instance = lambda obj: f"{obj.get_name_display()} ({obj.service_type})"
+        self.fields['service'].label_from_instance = lambda obj: f"{obj.name} ({obj.get_service_type_display()})"
 
 
 class MeterReadingForm(forms.ModelForm):

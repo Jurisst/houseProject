@@ -1,10 +1,4 @@
 from django.urls import path
-# from .views import (HouseListView, HouseUpdateView, ProviderListView, ProviderUpdateView,
-#                     ServiceListView, ServiceUpdateView, ApartmentListView, ApartmentUpdateView,
-#                     MeterListView, IncomingBillListView, MeterUpdateView, ConsumerListView, ConsumerUpdateView,
-#                     houses_apartments, houses_services, houses_meters, add_apartment_to_house, add_meter_to_apartment,
-#                     meters_by_apartment, IncomingBillDetailView, IncomingBillUpdateView, add_meter_reading, calculate_consumption,
-#                     meter_readings, houses_consumers, calculate_total_bills, generate_apartment_bill_pdf)
 from . import views
 
 urlpatterns = [

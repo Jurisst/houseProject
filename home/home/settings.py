@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['yourusername.pythonanywhere.com', 'localhost']
 
@@ -41,11 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
 
-    'widget_tweaks',
-
 ]
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'index' 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index' 
 
@@ -125,12 +121,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
-    BASE_DIR  / "bills" / "static",
+    BASE_DIR / "static",
 ]
+
+# Media files settings (if you have any)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
