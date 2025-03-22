@@ -133,6 +133,8 @@ class Apartment(models.Model):
         self.address.area_of_apartments_total = total_area
         self.address.area_of_apartments_heated_total = total_heated_area
         self.address.update_apartment_count()
+        self.address.update_living_person_count()
+        self.address.update_declared_person_count()
         self.address.save(update_fields=['area_of_apartments_total', 'area_of_apartments_heated_total'])
 
     def delete(self, *args, **kwargs):
@@ -144,6 +146,8 @@ class Apartment(models.Model):
         house.area_of_apartments_total = total_area
         house.area_of_apartments_heated_total = total_heated_area
         house.update_apartment_count()
+        house.update_living_person_count()
+        house.update_declared_person_count()
         house.save(update_fields=['area_of_apartments_total', 'area_of_apartments_heated_total'])
 
 
