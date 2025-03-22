@@ -50,10 +50,10 @@ class HouseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make fields read-only
-        self.fields['area_of_apartments_total'].widget.attrs['readonly'] = True
-        self.fields['area_of_apartments_heated_total'].widget.attrs['readonly'] = True
-        self.fields['apartment_count'].widget.attrs['readonly'] = True
+        # Disable the fields but still show their values
+        self.fields['area_of_apartments_total'].widget.attrs['disabled'] = True
+        self.fields['area_of_apartments_heated_total'].widget.attrs['disabled'] = True
+        self.fields['apartment_count'].widget.attrs['disabled'] = True
 
         # Set initial values if it's a new instance
         if not self.instance.pk:
