@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %} House - services {% endblock %}
@@ -7,7 +6,7 @@
 <aside class="vertical-menu">
     <a href="{% url 'house_update' house.id %}">Back to house</a>
     <a href="{% url 'add_service_here' house.id %}">Add Service here</a>
-    <a href="{% url 'calculate_public_bills' house.id %}">Calculate public bills</a>
+    <a href="{% url 'calculate_public_bills' house.id %}">Calculate object count bills</a>
     <a href="{% url 'index' %}">Back to start</a>
 
     <a href="#">Profile</a>

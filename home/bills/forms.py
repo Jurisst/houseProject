@@ -32,7 +32,7 @@ class ServiceForm2(forms.ModelForm):
 
 
 class HouseForm(forms.ModelForm):
-    apartment_count = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'readonly': 'readonly'}))
+    # apartment_count = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'readonly': 'readonly'}))
 
     class Meta:
         model = House
@@ -41,14 +41,25 @@ class HouseForm(forms.ModelForm):
             'area_of_apartments_total': forms.NumberInput(attrs={'readonly': 'readonly'})
         }
         help_texts = {
-            'area_of_apartments_total': _('This field is automatically calculated from apartment areas')
+            'apartment_count': _('Automatically calculated'),
+            'area_of_apartments_total': _('Automatically calculated from apartment areas'),
+            'area_of_apartments_heated_total': _('Automatically calculated from apartment heated areas'),
+            'living_person_count': _('Automatically calculated'),
+            'declared_person_count': _('Automatically calculated')            
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['area_of_apartments_total'].required = False
+        # Make fields read-only
+        self.fields['area_of_apartments_total'].widget.attrs['readonly'] = True
+        self.fields['area_of_apartments_heated_total'].widget.attrs['readonly'] = True
+        self.fields['apartment_count'].widget.attrs['readonly'] = True
+
+        # Set initial values if it's a new instance
         if not self.instance.pk:
             self.fields['area_of_apartments_total'].initial = 0
+            self.fields['area_of_apartments_heated_total'].initial = 0
+            self.fields['apartment_count'].initial = 0
 
     def clean(self):
         cleaned_data = super().clean()

@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
     {% block title %} Update house {% endblock %}
@@ -11,7 +10,7 @@
         <a href="{% url 'consumers_by_house' house.id %}">Consumers here</a>
         <a href="{% url 'incoming_bills' house.id %}">Incoming bills here</a>
         <a href="{% url 'add_incoming' house.id %}">Create incoming bill</a>
-        <a href="{% url 'calculate_public_bills' house.id %}">calculate public bills</a>
+        <a href="{% url 'calculate_public_bills' house.id %}">Calculate object count bills</a>
         <a href="{% url 'total_bills' house.id %}">CALCULATE TOTAL BILLS</a>
         <a href="{% url 'add_house' %}">Add new house</a>
         <a href="{% url 'houses' %}">Back</a>

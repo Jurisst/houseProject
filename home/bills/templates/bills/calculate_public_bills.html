@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Public Bills Calculation {% endblock %}
+{% block title %} Object Count Bills Calculation {% endblock %}
 {% block sidebar %}
 <aside class="vertical-menu">
    <a href="{% url 'incoming_bills' house.id %}">Incoming bills here</a>
@@ -13,7 +13,7 @@
 {% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Public Bills Calculation for {{ house.address }}</h2>
+    <h2>Object Count Bills Calculation for {{ house.address }}</h2>
 
     <!-- Period selection form -->
     <form method="get" class="mb-4">
@@ -82,7 +82,7 @@
             </table>
         </div>
     {% else %}
-        <p>No public bills found for this period.</p>
+        <p>No object count bills found for this period.</p>
     {% endif %}
     
     <a href="{% url 'services_by_house' house.id %}" class="btn btn-secondary">Back to Services</a>

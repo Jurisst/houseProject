@@ -28,8 +28,8 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from io import BytesIO
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -620,7 +620,7 @@ def calculate_public_bills(request, house_id):
     # Filter incoming bills by house, service type, and period
     incoming_bills = IncomingBill.objects.filter(
         house=house,
-        service__service_type='public',
+        service__service_type='object_count',
         year=selected_year,
         month=selected_month
     )
@@ -649,7 +649,7 @@ def calculate_public_bills(request, house_id):
     # Get available years from incoming bills
     available_years = IncomingBill.objects.filter(
         house=house,
-        service__service_type='public'
+        service__service_type='object_count'
     ).values_list('year', flat=True).distinct().order_by('year')
 
     context = {
@@ -871,6 +871,7 @@ def calculate_total_bills(request, house_id):
     house = get_object_or_404(House, id=house_id)
     apartments = Apartment.objects.filter(address=house)
     
+    # Get the selected year and month from request parameters or use current date
     try:
         selected_month = int(request.GET.get('month', datetime.now().month))
         selected_year = int(request.GET.get('year', datetime.now().year))
@@ -878,12 +879,12 @@ def calculate_total_bills(request, house_id):
         selected_month = datetime.now().month
         selected_year = datetime.now().year
 
-    # Get all bills for the period
+    # Get all incoming bills for the selected period
     incoming_bills = IncomingBill.objects.filter(
         house=house,
         year=selected_year,
         month=selected_month
-    ).select_related('service')
+    )
     
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
@@ -893,8 +894,8 @@ def calculate_total_bills(request, house_id):
         individual_positions = []
         total_amount = 0
         
-        # Calculate public services
-        public_bills = incoming_bills.filter(service__service_type='public')
+        # Calculate object count services
+        public_bills = incoming_bills.filter(service__service_type='object_count')
         for bill in public_bills:
             amount = bill.amount / apartments.count()
             public_positions.append({
@@ -906,8 +907,11 @@ def calculate_total_bills(request, house_id):
             })
             total_amount += amount
 
-        # Calculate individual services
-        individual_bills = incoming_bills.filter(service__service_type='individual')
+        # Calculate volume services
+        individual_bills = incoming_bills.filter(service__service_type='volume')
+        living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
+        declared_person_bills = incoming_bills.filter(service__service_type='declared_person_count')
+        part_of_house_bills = incoming_bills.filter(service__service_type='part_of_house')  
         for bill in individual_bills:
             # Use the mapping to get the correct meter type
             meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
@@ -924,7 +928,7 @@ def calculate_total_bills(request, house_id):
                         reading_date__year=selected_year,
                         reading_date__month=selected_month
                     ).first()
-                    # print(current_reading)
+                    
                     # Get previous month reading
                     if selected_month == 1:
                         prev_month = 12
@@ -956,7 +960,6 @@ def calculate_total_bills(request, house_id):
                     })
                     total_amount += amount
             
-        
         apartment_bills[apartment] = {
             'public_positions': public_positions,
             'individual_positions': individual_positions,
@@ -984,59 +987,40 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     house = get_object_or_404(House, id=house_id)
     apartment = get_object_or_404(Apartment, id=apartment_id)
     
-    # Create a file-like buffer to receive PDF data
-    buffer = BytesIO()
-    
-    # Create the PDF object using the buffer
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    
-    # Container for the 'Flowable' objects
-    elements = []
-    
-    # Define styles with Arial Unicode font
-    styles = getSampleStyleSheet()
-    styles['Normal'].fontName = 'ArialUnicode'
-    styles['Heading1'].fontName = 'ArialUnicode'
-    styles['Heading2'].fontName = 'ArialUnicode'
-    
-    # Increase font size for headings
-    styles['Heading1'].fontSize = 16
-    styles['Heading2'].fontSize = 14
-    
-    # Add encoding to the document
-    doc.encoding = 'UTF-8'
-    
-    # Convert strings to proper UTF-8 format without explicit encoding/decoding
-    title = Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles['Heading1'])
-    elements.append(title)
-    
-    # Add period
-    period = Paragraph(f"Period: {month}/{year}", styles['Normal'])
-    elements.append(period)
-    
-    # Add consumer info without explicit encoding/decoding
-    consumer_info = [
-        Paragraph(f"Consumer: {apartment.consumer.name}", styles['Normal']),
-        Paragraph(f"Email: {apartment.consumer.e_mail}", styles['Normal']),
-        Paragraph(f"Billing Address: {apartment.consumer.billing_address}", styles['Normal']),
-    ]
-    elements.extend(consumer_info)
-    
-    # Get bill data
+    # Get all incoming bills for the selected period
     incoming_bills = IncomingBill.objects.filter(
         house=house,
         year=year,
         month=month
-    ).select_related('service')
+    )
+    
+    # Create PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(
+        name='ArialUnicode',
+        fontName='ArialUnicode',
+        fontSize=12
+    ))
+    
+    # Add title
+    elements.append(Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles['Heading1']))
+    elements.append(Paragraph(f"Address: {house.address}", styles['Normal']))
+    elements.append(Paragraph(f"Period: {year}-{month}", styles['Normal']))
+    elements.append(Spacer(1, 20))
     
     # Prepare data for tables
-    public_data = [['Service', 'Quantity', 'Unit', 'Price per Unit', 'Amount']]
-    individual_data = [['Service', 'Meter', 'Consumption', 'Unit', 'Price per Unit', 'Amount']]
+    public_data = [['Service', 'Quantity', 'Units', 'Price/Unit', 'Amount']]
+    individual_data = [['Service', 'Meter', 'Consumption', 'Units', 'Price/Unit', 'Amount']]
     
     total_amount = 0
     
-    # Public services
-    public_bills = incoming_bills.filter(service__service_type='public')
+    # Object count services
+    public_bills = incoming_bills.filter(service__service_type='object_count')
     apartments_count = Apartment.objects.filter(address=house).count()
     
     for bill in public_bills:
@@ -1050,8 +1034,8 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
         ])
         total_amount += amount
     
-    # Individual services
-    individual_bills = incoming_bills.filter(service__service_type='individual')
+    # Volume services
+    individual_bills = incoming_bills.filter(service__service_type='volume')
     for bill in individual_bills:
         # Use the mapping to get the correct meter type
         meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
@@ -1103,7 +1087,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     
     # Create tables
     if len(public_data) > 1:
-        elements.append(Paragraph("Public Services", styles['Heading2']))
+        elements.append(Paragraph("Object Count Services", styles['Heading2']))
         public_table = Table(public_data)
         public_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -1119,7 +1103,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     print(len(public_data))
     print(len(individual_data))
     if len(individual_data) > 1:
-        elements.append(Paragraph("Individual Services", styles['Heading2']))
+        elements.append(Paragraph("Volume Services", styles['Heading2']))
         individual_table = Table(individual_data)
         individual_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -1145,7 +1129,6 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     
     # Create the HTTP response
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="bill_{apartment.apartment_nr}_{month}_{year}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="bill_{apartment.apartment_nr}_{year}_{month}.pdf"'
     response.write(pdf)
-    
     return response

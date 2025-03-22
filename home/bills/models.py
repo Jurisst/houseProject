@@ -44,11 +44,21 @@ class House(models.Model):
     apartment_count = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
     area_of_apartments_total = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
     area_of_apartments_heated_total = models.IntegerField("Total heated area of apartments", validators=[MinValueValidator(0, 'Can not be negative number')])
+    living_person_count = models.IntegerField("Count of living persons", validators=[MinValueValidator(0, 'Can not be negative number')])
+    declared_person_count = models.IntegerField("Count of declared persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     area_total = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
 
     def update_apartment_count(self):
         self.apartment_count = Apartment.objects.filter(address=self).count()
         self.save(update_fields=['apartment_count'])
+
+    def update_living_person_count(self):
+        self.living_person_count = Apartment.objects.filter(address=self).aggregate(Sum('living_person_count'))['living_person_count__sum'] or 0
+        self.save(update_fields=['living_person_count'])
+
+    def update_declared_person_count(self):
+        self.declared_person_count = Apartment.objects.filter(address=self).aggregate(Sum('declared_person_count'))['declared_person_count__sum'] or 0
+        self.save(update_fields=['declared_person_count'])
 
     def get_absolute_url(self):
         return reverse("house_update", kwargs={"pk": self.pk})
@@ -64,8 +74,15 @@ class Service(models.Model):
     name = models.CharField(max_length=30, choices=NAME_CHOICES, validators=[MinLengthValidator(3, 'Must be at least 3 characters')])
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=None)
     # type of the service (public/private)
-    CHOICES = [('public', 'Public'), ('individual', 'Individual')]
-    service_type = models.CharField(max_length=10, choices=CHOICES)
+    CHOICES = [
+        ('object_count', 'Count of objects (524.4.1)'),
+        ('part_of_house', 'Part of house (524.4.2)'),
+        ('living_person_count', 'Count of living persons (524.4.3)'),
+        ('declared_person_count', 'Count of declared persons (524.4.4)'),
+        ('area', 'Area (524.17.1)'),
+        ('volume', 'Volume (524.17.2)'),
+    ]
+    service_type = models.CharField(max_length=30, choices=CHOICES)
     # measuring units
     measuring_units = models.CharField(max_length=4, validators=[
         MinLengthValidator(1, 'Must be at least 1 character')
@@ -98,7 +115,8 @@ class Apartment(models.Model):
     cold_meters_count = models.IntegerField("Count of cold water meters", validators=[MinValueValidator(0, 'Can not be negative number')])
     hot_meters_count = models.IntegerField("Count of hot water meters", validators=[MinValueValidator(0, 'Can not be negative number')])
     heat_meters_count = models.IntegerField("Count of heat meters", validators=[MinValueValidator(0, 'Can not be negative number')])
-    person_count = models.IntegerField("Count of persons", validators=[MinValueValidator(0, 'Can not be negative number')])
+    living_person_count = models.IntegerField("Count of living persons", validators=[MinValueValidator(0, 'Can not be negative number')])
+    declared_person_count = models.IntegerField("Count of declared persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, default='')
     contract_nr = models.CharField(null=True, max_length=50, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
 
