@@ -87,13 +87,13 @@ def success_add_house(request, house_id):
 
 
 def success_add_consumer(request, consumer_id):
-    consumer = get_object_or_404(Consumer, id=consumer_id)  # Get the product instance
+    consumer = get_object_or_404(Consumer, id=consumer_id) 
     return render(request, 'bills/sp_consumer_add.html', {'consumer': consumer})
 
 
 def success_add_apartment(request, house_id, apartment_id):
-    house = get_object_or_404(House, id=house_id)  # Get the product instance
-    apartment = get_object_or_404(Apartment, id=apartment_id)  # Get the product instance
+    house = get_object_or_404(House, id=house_id)
+    apartment = get_object_or_404(Apartment, id=apartment_id)
     return render(request, 'bills/sp_apartment_add.html', {'house_id': house.id,  'apartment_id': apartment.id})
 
 
