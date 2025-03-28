@@ -56,24 +56,33 @@
                         {% translate "Download PDF" %}
                     </a>
                 </div>
-                <div class="card-body">
+                <div class="card-body d-flex flex-column gap-3 align-items-end">
                     {% if bill_data.public_positions %}
                         <h6>{% translate "Object Count Services" %}</h6>
-                        <table class="table table-sm">
+                        <table class="table table-sm table-bordered">
                             <thead>
                                 <tr>
                                     <th>{% translate "Service" %}</th>
                                     <th>{% translate "Quantity" %}</th>
-                                    <th>{% translate "Price per Unit" %}</th>
+                                    <th>{% translate "Pay for person" %}</th>
+                                    <!-- <th>{% translate "Price per Unit" %}</th> -->
+                                    <th>{% translate "Calculation" %}</th>
                                     <th>{% translate "Amount" %}</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for position in bill_data.public_positions %}
                                 <tr>
                                     <td>{{ position.service }}</td>
-                                    <td>{{ position.quantity }} {{ position.measuring_units }}</td>
-                                    <td>{{ position.price_per_unit }}</td>
+                                    <td>{{ position.quantity }}</td>
+                                    <td>{{ position.pay_for_person }}</td>
+                                    <!-- <td>{{ position.price_per_unit }}</td> -->
+                                    {% if position.service_type == 'living_person_count' %}  
+                                        <td> {% translate "living person count" %} {{ position.living_person_count }} * {{ position.pay_for_person }} </td>
+                                    {% elif position.service_type == 'declared_person_count' %}
+                                        <td> {% translate "declared person count" %} {{ position.declared_person_count }} * {{ position.pay_for_person }} </td>
+                                    {% endif %}
                                     <td>{{ position.amount }}</td>
                                 </tr>
                                 {% endfor %}
@@ -83,7 +92,7 @@
 
                     {% if bill_data.individual_positions %}
                         <h6>{% translate "Volume Services" %}</h6>
-                        <table class="table table-sm">
+                        <table class="table table-sm table-bordered">
                             <thead>
                                 <tr>
                                     <th>{% translate "Service" %}</th>

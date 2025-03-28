@@ -37,10 +37,46 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.lib.fonts import addMapping
 import os
 from django.conf import settings
+from .calculations import calculate_object_count_bills, calculate_bills_for_person_count
 
-# Register Arial Unicode MS font
+
+# Register DejaVu Sans font for Unicode support
 FONT_PATH = os.path.join(settings.BASE_DIR, 'static', 'fonts')
-pdfmetrics.registerFont(TTFont('ArialUnicode', os.path.join(FONT_PATH, 'arial-unicode-ms.TTF')))
+pdfmetrics.registerFont(TTFont('DejaVuSans', os.path.join(FONT_PATH, 'DejaVuSans.TTF')))
+pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', os.path.join(FONT_PATH, 'DejaVuSans-Bold.TTF')))
+
+# Register font family
+registerFontFamily('DejaVuSans',
+    normal='DejaVuSans',
+    bold='DejaVuSans-Bold'
+)
+
+# Add Unicode mapping for Latvian characters
+addMapping('DejaVuSans', 0, 0, 'DejaVuSans')
+addMapping('DejaVuSans', 0, 1, 'DejaVuSans-Bold')
+
+# Define Unicode ranges for Latvian characters
+LATVIAN_RANGES = [
+    (0x0100, 0x0101),  # Ā, ā
+    (0x010C, 0x010D),  # Č, č
+    (0x0112, 0x0113),  # Ē, ē
+    (0x0122, 0x0123),  # Ģ, ģ
+    (0x012A, 0x012B),  # Ī, ī
+    (0x0136, 0x0137),  # Ķ, ķ
+    (0x013B, 0x013C),  # Ļ, ļ
+    (0x0145, 0x0146),  # Ņ, ņ
+    (0x014C, 0x014D),  # Ō, ō
+    (0x0156, 0x0157),  # Ŗ, ŗ
+    (0x0160, 0x0161),  # Š, š
+    (0x016A, 0x016B),  # Ū, ū
+    (0x017D, 0x017E),  # Ž, ž
+]
+
+# Add mapping for each Latvian character range
+for start, end in LATVIAN_RANGES:
+    for code in range(start, end + 1):
+        addMapping('DejaVuSans', code, 0, 'DejaVuSans')
+        addMapping('DejaVuSans', code, 1, 'DejaVuSans-Bold')
 
 SERVICE_TO_METER_TYPE = {
     'cold_water': 'cold',
@@ -885,6 +921,11 @@ def calculate_total_bills(request, house_id):
         year=selected_year,
         month=selected_month
     )
+
+    # Filter bills by service type
+    living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
+    declared_person_bills = incoming_bills.filter(service__service_type='declared_person_count')
+    object_count_bills = incoming_bills.filter(service__service_type='object_count')
     
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
@@ -893,25 +934,16 @@ def calculate_total_bills(request, house_id):
         public_positions = []
         individual_positions = []
         total_amount = 0
-        
-        # Calculate object count services
-        public_bills = incoming_bills.filter(service__service_type='object_count')
-        for bill in public_bills:
-            amount = bill.amount / apartments.count()
-            public_positions.append({
-                'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
-                'amount': round(amount, 2),
-                'quantity': round(bill.quantity_received / apartments.count(), 3),
-                'price_per_unit': bill.service.price_per_unit,
-                'measuring_units': bill.service.measuring_units
-            })
-            total_amount += amount
 
+        if object_count_bills:
+            calculate_object_count_bills(house, incoming_bills, public_positions, apartments, Service, total_amount)
+        if living_person_bills: 
+            calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
+        if declared_person_bills:
+            calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
+        
         # Calculate volume services
         individual_bills = incoming_bills.filter(service__service_type='volume')
-        living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
-        declared_person_bills = incoming_bills.filter(service__service_type='declared_person_count')
-        part_of_house_bills = incoming_bills.filter(service__service_type='part_of_house')  
         for bill in individual_bills:
             # Use the mapping to get the correct meter type
             meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
@@ -1002,15 +1034,20 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     # Define styles
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(
-        name='ArialUnicode',
-        fontName='ArialUnicode',
+        name='DejaVuSans',
+        fontName='DejaVuSans',
+        fontSize=12
+    ))
+    styles.add(ParagraphStyle(
+        name='DejaVuSans-Bold',
+        fontName='DejaVuSans-Bold',
         fontSize=12
     ))
     
     # Add title
-    elements.append(Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles['Heading1']))
-    elements.append(Paragraph(f"Address: {house.address}", styles['Normal']))
-    elements.append(Paragraph(f"Period: {year}-{month}", styles['Normal']))
+    elements.append(Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles['DejaVuSans-Bold']))
+    elements.append(Paragraph(f"Address: {house.address}", styles['DejaVuSans']))
+    elements.append(Paragraph(f"Period: {year}-{month}", styles['DejaVuSans']))
     elements.append(Spacer(1, 20))
     
     # Prepare data for tables
@@ -1033,7 +1070,25 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
             f"{amount:.2f}"
         ])
         total_amount += amount
+
+    # Add living person count services
+    living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
+    total_living_persons = Apartment.objects.filter(address=house).aggregate(Sum('living_person_count'))['living_person_count__sum'] or 0
     
+    if total_living_persons > 0:  # Only process if there are living persons
+        for bill in living_person_bills:
+            apartment_persons = apartment.living_person_count
+            if apartment_persons > 0:  # Only calculate for apartments with living persons
+                amount = (bill.amount / total_living_persons) * apartment_persons
+                public_data.append([
+                    dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
+                    f"{apartment_persons}",
+                    "persons",
+                    f"{bill.amount / total_living_persons:.2f}",
+                    f"{amount:.2f}"
+                ])
+                total_amount += amount
+
     # Volume services
     individual_bills = incoming_bills.filter(service__service_type='volume')
     for bill in individual_bills:
@@ -1093,7 +1148,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, -1), 'ArialUnicode'),  # Use same font for all cells
+            ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSans'),
             ('FONTSIZE', (0, 0), (-1, 0), 12),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
@@ -1109,7 +1164,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, -1), 'ArialUnicode'),  # Use same font for all cells
+            ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSans'),
             ('FONTSIZE', (0, 0), (-1, 0), 12),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
