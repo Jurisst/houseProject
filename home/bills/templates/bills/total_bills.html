@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
+{% block title %} Total bills {% endblock %}
 {% block sidebar %}
 <aside class="vertical-menu">
     <a href="{% url 'apartments_by_house' house.id %}">Apartments here</a>
@@ -68,6 +69,8 @@
                                     <!-- <th>{% translate "Price per Unit" %}</th> -->
                                     <th>{% translate "Calculation" %}</th>
                                     <th>{% translate "Amount" %}</th>
+                                    <th>{% translate "VAT" %}</th>
+                                    <th>{% translate "Total" %}</th>
                                     
                                 </tr>
                             </thead>
@@ -79,11 +82,13 @@
                                     <td>{{ position.pay_for_person }}</td>
                                     <!-- <td>{{ position.price_per_unit }}</td> -->
                                     {% if position.service_type == 'living_person_count' %}  
-                                        <td> {% translate "living person count" %} {{ position.living_person_count }} * {{ position.pay_for_person }} </td>
+                                        <td> {% translate "living person count" %} {{ position.living_person_count }} * {{ position.pay_for_person }} € </td>
                                     {% elif position.service_type == 'declared_person_count' %}
-                                        <td> {% translate "declared person count" %} {{ position.declared_person_count }} * {{ position.pay_for_person }} </td>
+                                        <td> {% translate "declared person count" %} {{ position.declared_person_count }} * {{ position.pay_for_person }} € </td>
                                     {% endif %}
-                                    <td>{{ position.amount }}</td>
+                                    <td>{{ position.amount|floatformat:2 }} € </td>
+                                    <td>{{ position.vat_amount|floatformat:2 }} € </td>
+                                    <td>{{ position.total|floatformat:2 }} €</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -101,7 +106,9 @@
                                     <th>{% translate "Current Reading" %}</th>
                                     <th>{% translate "Consumption" %}</th>
                                     <th>{% translate "Price per Unit" %}</th>
-                                    <th>{% translate "Amount" %}</th>
+                                    <th>{% translate "Amount" %}  </th>
+                                    <th>{% translate "VAT" %}  </th>
+                                    <th>{% translate "Total" %}  </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,7 +123,8 @@
                                                 {{ position.prev_reading.reading_date|date:"d/m/Y" }}
                                             </small>
                                         {% else %}
-                                            <span class="text-danger">{% translate "Missing" %}</span>
+                                            {{ position.default_reading }} {{ position.measuring_units }}
+                                            <small class="text-muted d-block">{% translate "Default reading on installation" %}</small>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -136,8 +144,10 @@
                                             <span class="text-warning">{% translate "No data" %}</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ position.price_per_unit }}</td>
-                                    <td>{{ position.amount }}</td>
+                                    <td>{{ position.price_per_unit|floatformat:2 }} € </td>
+                                    <td>{{ position.amount|floatformat:2 }} € </td>
+                                    <td>{{ position.vat_amount|floatformat:2 }} € </td>
+                                    <td>{{ position.total|floatformat:2 }} €</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -150,7 +160,7 @@
                     {% endif %}
 
                     <div class="text-right mt-3">
-                        <strong>{% translate "Total Amount" %}: {{ bill_data.total }}</strong>
+                        <strong>{% translate "Total Amount" %}: {{ bill_data.total }} € </strong>
                     </div>
                 </div>
             </div>

@@ -37,7 +37,12 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.lib.fonts import addMapping
 import os
 from django.conf import settings
-from .calculations import calculate_object_count_bills, calculate_bills_for_person_count
+from .calculations import (
+    calculate_object_count_bills, 
+    calculate_bills_for_person_count,
+    calculate_volume_services,
+    SERVICE_TO_METER_TYPE
+)
 
 
 # Register DejaVu Sans font for Unicode support
@@ -77,14 +82,6 @@ for start, end in LATVIAN_RANGES:
     for code in range(start, end + 1):
         addMapping('DejaVuSans', code, 0, 'DejaVuSans')
         addMapping('DejaVuSans', code, 1, 'DejaVuSans-Bold')
-
-SERVICE_TO_METER_TYPE = {
-    'cold_water': 'cold',
-    'hot_water': 'hot',
-    'electricity': 'electricity',
-    'heat': 'heat',
-    'other': 'other'
-}
 
 @login_required
 def index(request, user_id=None):
@@ -926,7 +923,8 @@ def calculate_total_bills(request, house_id):
     living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
     declared_person_bills = incoming_bills.filter(service__service_type='declared_person_count')
     object_count_bills = incoming_bills.filter(service__service_type='object_count')
-    
+    volume_bills = incoming_bills.filter(service__service_type='volume')
+
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
     
@@ -936,62 +934,24 @@ def calculate_total_bills(request, house_id):
         total_amount = 0
 
         if object_count_bills:
-            calculate_object_count_bills(house, incoming_bills, public_positions, apartments, Service, total_amount)
+            total_amount = calculate_object_count_bills(house, object_count_bills, public_positions, apartments, Service, total_amount)
         if living_person_bills: 
-            calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
+            total_amount = calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
         if declared_person_bills:
-            calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
-        
+            total_amount = calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
+
         # Calculate volume services
-        individual_bills = incoming_bills.filter(service__service_type='volume')
-        for bill in individual_bills:
-            # Use the mapping to get the correct meter type
-            meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
-            if meter_type:
-                meters = Meter.objects.filter(
-                    apartment_number=apartment,
-                    type=meter_type
-                )
-            
-                for meter in meters:
-                    # Get current month reading
-                    current_reading = MeterReading.objects.filter(
-                        meter=meter,
-                        reading_date__year=selected_year,
-                        reading_date__month=selected_month
-                    ).first()
-                    
-                    # Get previous month reading
-                    if selected_month == 1:
-                        prev_month = 12
-                        prev_year = selected_year - 1
-                    else:
-                        prev_month = selected_month - 1
-                        prev_year = selected_year
-                        
-                    prev_reading = MeterReading.objects.filter(
-                        meter=meter,
-                        reading_date__year=prev_year,
-                        reading_date__month=prev_month
-                    ).first()
-                    
-                    if current_reading and prev_reading:
-                        consumption = current_reading.reading_value - prev_reading.reading_value
-                    else:
-                        consumption = 0
-                    amount = consumption * bill.service.price_per_unit
-                    individual_positions.append({
-                        'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
-                        'meter': meter,
-                        'consumption': round(consumption, 3),
-                        'amount': round(amount, 2),
-                        'price_per_unit': bill.service.price_per_unit,
-                        'measuring_units': bill.service.measuring_units,
-                        'current_reading': current_reading,
-                        'prev_reading': prev_reading
-                    })
-                    total_amount += amount
-            
+        if volume_bills:
+            total_amount = calculate_volume_services(
+                volume_bills,
+                apartment,
+                selected_year,
+                selected_month,
+                individual_positions,
+                Service,
+                total_amount
+            )
+
         apartment_bills[apartment] = {
             'public_positions': public_positions,
             'individual_positions': individual_positions,
@@ -1014,6 +974,7 @@ def calculate_total_bills(request, house_id):
     
     return render(request, 'bills/total_bills.html', context)
 
+
 @login_required
 def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     house = get_object_or_404(House, id=house_id)
@@ -1025,7 +986,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
         year=year,
         month=month
     )
-    
+            
     # Create PDF
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
@@ -1090,8 +1051,8 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
                 total_amount += amount
 
     # Volume services
-    individual_bills = incoming_bills.filter(service__service_type='volume')
-    for bill in individual_bills:
+    volume_bills = incoming_bills.filter(service__service_type='volume')
+    for bill in volume_bills:
         # Use the mapping to get the correct meter type
         meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
         if meter_type:
