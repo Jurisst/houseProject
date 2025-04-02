@@ -164,7 +164,7 @@ class IncomingBillForm2(forms.ModelForm):
             self.fields['service'].queryset = Service.objects.filter(house=self.instance.house)
         
         # Add this to show verbose name in dropdown
-        self.fields['service'].label_from_instance = lambda obj: f"{obj.name} ({obj.get_service_type_display()})"
+        self.fields['service'].label_from_instance = lambda obj: f"{obj.get_name_display()} ({obj.get_service_type_display()})"
 
 
 class MeterReadingForm(forms.ModelForm):

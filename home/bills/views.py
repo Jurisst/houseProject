@@ -41,6 +41,7 @@ from .calculations import (
     calculate_object_count_bills, 
     calculate_bills_for_person_count,
     calculate_volume_services,
+    calculate_area_services,
     SERVICE_TO_METER_TYPE
 )
 
@@ -924,6 +925,7 @@ def calculate_total_bills(request, house_id):
     declared_person_bills = incoming_bills.filter(service__service_type='declared_person_count')
     object_count_bills = incoming_bills.filter(service__service_type='object_count')
     volume_bills = incoming_bills.filter(service__service_type='volume')
+    area_bills = incoming_bills.filter(service__service_type='area')
 
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
@@ -939,7 +941,8 @@ def calculate_total_bills(request, house_id):
             total_amount = calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
         if declared_person_bills:
             total_amount = calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
-
+        if area_bills:
+            total_amount = calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount)
         # Calculate volume services
         if volume_bills:
             total_amount = calculate_volume_services(
@@ -951,6 +954,7 @@ def calculate_total_bills(request, house_id):
                 Service,
                 total_amount
             )
+        print(total_amount)            
 
         apartment_bills[apartment] = {
             'public_positions': public_positions,
@@ -959,9 +963,15 @@ def calculate_total_bills(request, house_id):
         }
 
     # Get available years from incoming bills
-    available_years = IncomingBill.objects.filter(
+    available_years = list(IncomingBill.objects.filter(
         house=house
-    ).values_list('year', flat=True).distinct().order_by('year')
+    ).values_list('year', flat=True).distinct().order_by('year'))
+    
+    # Add current year if not in the list
+    current_year = datetime.now().year
+    if current_year not in available_years:
+        available_years.append(current_year)
+        available_years.sort()
 
     context = {
         'house': house,

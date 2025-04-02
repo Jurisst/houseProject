@@ -93,7 +93,7 @@ class Service(models.Model):
     meters_of_volume = models.BooleanField(choices=CHOICES_BOOL, default=True)
 
     def __str__(self):
-        return self.name + '  ' + self.service_type 
+        return self.get_name_display() + '  ' + self.get_service_type_display() 
 
 
 class Consumer(models.Model):
@@ -204,6 +204,8 @@ class HouseManagement(models.Model):
     phone_number = models.CharField(max_length=15, validators=[MinLengthValidator(11, 'Must be at least 11 characters')])
     e_mail = models.EmailField()
     account = models.CharField(max_length=25, validators=[MinLengthValidator(10, 'Must be at least 10 characters')])
+    def __str__(self):
+        return self.name + ' ' + self.address
 
 
 class OutgoingBill(models.Model):
@@ -217,7 +219,10 @@ class OutgoingBill(models.Model):
                                              validators=[RegexValidator(r'^(0?[1-9]|1[0-2])$')])
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-        
+    extra_fields = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return f"{self.house_management} - {self.apartment} - {self.service} - {self.year}-{self.month} - Extra: {self.extra_fields}"
 
 class MeterReading(models.Model):
     meter = models.ForeignKey(Meter, on_delete=models.CASCADE)

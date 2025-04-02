@@ -77,6 +77,7 @@ urlpatterns = [
          name='apartment_update'),
 
     path('houses/<int:house_id>/total-bills/', views.calculate_total_bills, name='total_bills'),
+    path('houses/<int:house_id>/total-bills/<int:year>/<int:month>/', views.calculate_total_bills, name='total_bills_with_date'),
     path('houses/<int:house_id>/apartments/<int:apartment_id>/bill/<int:year>/<int:month>/pdf/', 
          views.generate_apartment_bill_pdf, name='generate_apartment_bill_pdf'),
 

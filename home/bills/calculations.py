@@ -44,26 +44,24 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
     for bill in bills:
         # pay for person count
         if bill.service.service_type == 'living_person_count':
-            pay_for_person = bill.amount / house.living_person_count
-            apartment_living_person_count = apartment.living_person_count
-            amount = pay_for_person * apartment_living_person_count
+            pay_for_unit = bill.amount / house.living_person_count
+            amount = pay_for_unit * apartment.living_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
-                'living_person_count': apartment_living_person_count,
+                'living_person_count': apartment.living_person_count,
                 'quantity': round(bill.quantity_received / house.living_person_count * apartment.living_person_count, 2),                
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
                 'service_type': bill.service.service_type,
                 'amount': round(amount, 2),
-                'pay_for_person': round(pay_for_person, 2),
+                'pay_for_unit': round(pay_for_unit, 2),
                 'price_per_unit': bill.service.price_per_unit,
                 'measuring_units': bill.service.measuring_units,
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-            # print(public_positions[-1])
         if bill.service.service_type == 'declared_person_count':
-            pay_for_person = bill.amount / house.declared_person_count
-            amount = pay_for_person * apartment.declared_person_count
+            pay_for_unit = bill.amount / house.declared_person_count
+            amount = pay_for_unit * apartment.declared_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
                 'declared_person_count': apartment.declared_person_count,
@@ -71,16 +69,35 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
                 'service_type': bill.service.service_type,
                 'amount': round(amount, 2),
-                'pay_for_person': round(pay_for_person, 2),
+                'pay_for_unit': round(pay_for_unit, 2),
                 'price_per_unit': bill.service.price_per_unit,
                 'measuring_units': bill.service.measuring_units,
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-            # print(public_positions[-1])
         total_amount += float(amount) + float(vat_amount)
     return total_amount
 
+
+def calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount):
+    for bill in area_bills:
+        pay_for_unit = bill.amount / house.area_of_apartments_total
+        amount = pay_for_unit * apartment.area
+        vat_amount = calculate_vat(bill, amount)
+        public_positions.append({
+            'area': apartment.area,
+            'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
+            'service_type': bill.service.service_type,
+            'amount': round(amount, 2),
+            'quantity': round(bill.quantity_received / house.area_of_apartments_total * apartment.area, 2),     
+            'pay_for_unit': round(pay_for_unit, 2),
+            'price_per_unit': bill.service.price_per_unit,
+            'measuring_units': bill.service.measuring_units,
+            'vat_amount': vat_amount,
+            'total': round(float(amount) + vat_amount, 2)
+        })
+        total_amount += float(amount) + float(vat_amount)
+    return total_amount
 
 def calculate_volume_services(volume_bills, apartment, selected_year, selected_month, individual_positions, Service, total_amount):
     for bill in volume_bills:
@@ -138,7 +155,8 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                     'vat_amount': vat_amount,
                     'total': round(float(amount) + vat_amount, 2)
                 })
+                if total_amount is None:
+                    total_amount = 0.0
                 total_amount += float(amount) + float(vat_amount)
                 
     return total_amount
-
