@@ -46,7 +46,7 @@ urlpatterns = [
     path('houses/<int:house_id>/add_consumer', views.add_consumer, name='add_consumer_here'),
     path('houses/<int:house_id>/apartments/<int:apartment_id>/add_meter', views.add_meter_to_apartment, name='add_meter_to_apartment'),
     path('houses/<int:house_id>/add_incoming_bill', views.add_incoming_bill, name='add_incoming'),
-
+    path('houses/<int:house_id>/meters/<int:meter_id>/add-reading/', views.add_meter_reading, name='add_meter_reading'),
     # House related views
     path("houses/<int:house_id>/apartments/", views.houses_apartments, name='apartments_by_house'),
     path("houses/<int:house_id>/services/", views.houses_services, name='services_by_house'),
@@ -60,5 +60,5 @@ urlpatterns = [
     path("houses/<int:house_id>/total-bills/<int:year>/<int:month>/", views.calculate_total_bills, name='total_bills_with_date'),
     path("houses/<int:house_id>/apartments/<int:apartment_id>/bill/<int:year>/<int:month>/pdf/", views.generate_apartment_bill_pdf, name='generate_apartment_bill_pdf'),
     path('houses/<int:house_id>/calculate-public-bills/', views.calculate_public_bills, name='calculate_public_bills'),
-    path('houses/<int:house_id>/meters/<int:meter_id>/add-reading/', views.add_meter_reading, name='add_meter_reading'),
+    
 ]
