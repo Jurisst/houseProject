@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>House Details</h2>
+            <a href="{{ edit_url }}" class="btn btn-primary">Edit</a>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ house.address }}</td>
+                </tr>
+                <tr>
+                    <th>Total Area:</th>
+                    <td>{{ house.area_of_apartments_total }}</td>
+                </tr>
+                <tr>
+                    <th>Heated Area:</th>
+                    <td>{{ house.area_of_apartments_heated_total }}</td>
+                </tr>
+                <tr>
+                    <th>Number of Apartments:</th>
+                    <td>{{ house.apartment_count }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

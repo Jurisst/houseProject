@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Service Details - {{ house.address }}</h2>
+            <div>
+                <a href="{% url 'services_by_house' house.id %}" class="btn btn-secondary">Back to Services</a>
+                <a href="{{ edit_url }}" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Name:</th>
+                    <td>{{ service.name }}</td>
+                </tr>
+                <tr>
+                    <th>Service Type:</th>
+                    <td>{{ service.service_type }}</td>
+                </tr>
+                <tr>
+                    <th>Measuring Units:</th>
+                    <td>{{ service.measuring_units }}</td>
+                </tr>
+                <tr>
+                    <th>Price per Unit:</th>
+                    <td>{{ service.price_per_unit }}</td>
+                </tr>
+                <tr>
+                    <th>House:</th>
+                    <td>{{ service.house.address }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

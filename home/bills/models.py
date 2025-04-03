@@ -257,7 +257,42 @@ class MeterReading(models.Model):
             pass
 
 
+class HouseMeter(models.Model):
+    CHOICES = [('cold', 'Cold water'), ('electricity', 'Electricity'), ('hot', 'Hot water'), ('heat', 'Heat'), ('other', 'Other')]
+    type = models.CharField('Type of meter', max_length=15, choices=CHOICES)
+    house = models.ForeignKey(House, on_delete=models.CASCADE)
+    name = models.CharField('Name of meter', max_length=15)
+    def __str__(self):
+        return f"{self.house} - {self.name}"
+    
 
+class HouseMeterReading(models.Model):
+    house_meter = models.ForeignKey(HouseMeter, on_delete=models.CASCADE)
+    reading_date = models.DateField()
+    reading_value = models.DecimalField(max_digits=10, decimal_places=3)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        # Add this to enforce uniqueness
+        unique_together = ['house_meter', 'reading_date']
+        ordering = ['-reading_date']
 
-        
+    def __str__(self):
+        return f"{self.house_meter} - {self.reading_date}: {self.reading_value}"
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Check if reading is greater than previous reading
+        previous_readings = HouseMeterReading.objects.all()
+        print(previous_readings)
+        if previous_readings:
+            previous_reading = HouseMeterReading.objects.filter(
+                house_meter=self.house_meter,
+                reading_date__lt=self.reading_date
+            ).order_by('-reading_date').first()
+            if previous_reading:
+                if self.reading_value < previous_reading.reading_value:
+                    raise ValidationError({
+                        'reading_value': _("New reading cannot be less than previous reading")
+                    })
+        else:
+            pass

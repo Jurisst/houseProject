@@ -7,7 +7,7 @@
 
     <a href="{% url 'add_meter_to_apartment' apartment.id %}">Add another meter</a>
     <a href="{% url 'meters_by_apartment' apartment.id %}">Back to meters</a>
-    <a href="{% url 'apartment_update' apartment.id %}">Back to apartment</a>
+    <a href="{% url 'apartment_update' house.id apartment.id %}">Back to apartment</a>
     {% endif %}
     <a href="#">Profile</a>
     <a href="#">Settings</a>

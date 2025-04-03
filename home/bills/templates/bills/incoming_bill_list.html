@@ -37,7 +37,7 @@
                         <td>{{ bill.period }}</td>
                         <td>€{{ bill.amount|floatformat:2 }}</td>
                         <td>
-                            <a href="{% url 'incoming_bill_update' bill.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{% url 'incoming_bill_update' house.id bill.pk %}" class="btn btn-sm btn-primary">Edit</a>
                         </td>
                     </tr>
                 {% endfor %}

@@ -95,6 +95,8 @@
                                 <tr>
                                     <th>{% translate "Service" %}</th>
                                     <th>{% translate "Meter" %}</th>
+                                    <th>{% translate "Previous Reading" %}</th>
+                                    <th>{% translate "Current Reading" %}</th>
                                     <th>{% translate "Consumption" %}</th>
                                     <th>{% translate "Price per Unit" %}</th>
                                     <th>{% translate "Amount" %}</th>
@@ -107,12 +109,23 @@
                                     <tr>
                                         <td>{{ position.service }}</td>
                                         <td>{{ position.meter }}</td>
+
                                         <td>
-                                            {% if position.consumption != 0 %}
-                                                {{ position.consumption }} {{ position.measuring_units }}
+                                            {% if position.prev_reading %}
+                                                {{ position.prev_reading.reading_value }}
                                             {% else %}
                                                 <span class="text-warning">{% translate "No data" %}</span>
                                             {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if position.current_reading %}
+                                                {{ position.current_reading.reading_value }}
+                                            {% else %}
+                                                <span class="text-warning">{% translate "No data" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ position.consumption }} {{ position.measuring_units }}
                                         </td>
                                         <td>{{ position.price_per_unit|floatformat:2 }} € </td>
                                         <td>{{ position.amount|floatformat:2 }} € </td>

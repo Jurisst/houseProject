@@ -99,7 +99,7 @@ def calculate_area_services(house, area_bills, apartment, public_positions, Serv
         total_amount += float(amount) + float(vat_amount)
     return total_amount
 
-def calculate_volume_services(volume_bills, apartment, selected_year, selected_month, individual_positions, Service, total_amount):
+def calculate_volume_services(volume_bills, apartment, selected_year, selected_month, individual_positions, Service, total_amount, monthly_consumption):
     for bill in volume_bills:
         # Use the mapping to get the correct meter type
         meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
@@ -139,6 +139,8 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                     consumption = current_reading.reading_value - default_reading
                 else:
                     consumption = 0
+
+                monthly_consumption += consumption
                 
                 amount = consumption * bill.service.price_per_unit
                 vat_amount = calculate_vat(bill, amount)
@@ -159,4 +161,4 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                     total_amount = 0.0
                 total_amount += float(amount) + float(vat_amount)
                 
-    return total_amount
+    return total_amount, monthly_consumption

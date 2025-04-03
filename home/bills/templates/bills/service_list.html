@@ -19,7 +19,7 @@
 <ul>
     {% for item in object_list %}
       <li>
-          <a href="{% url 'service_update' item.pk %}">{{ item }}</a>
+          <a href="{% url 'service_update' house.id item.pk %}">{{ item }}</a>
       </li>
     {% endfor %}
 </ul>

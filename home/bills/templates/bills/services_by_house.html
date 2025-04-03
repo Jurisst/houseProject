@@ -20,7 +20,7 @@
 <ul>
     {% for item in house_services %}
       <li>
-          <a href="{% url 'service_update' item.pk %}">{{ item.get_name_display }}  {{ item.service_type }}</a>
+          <a href="{% url 'service_update' house.id item.pk %}">{{ item.get_name_display }}  {{ item.service_type }}</a>
       </li>
     {% empty %}
             <li>No products found in this category.</li>

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Consumer Details - {{ house.address }}</h2>
+            <div>
+                <a href="{% url 'consumers_by_house' house_id %}" class="btn btn-secondary">Back to Consumers</a>
+                <a href="{{ edit_url }}" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Name:</th>
+                    <td>{{ consumer.name }}</td>
+                </tr>
+                <tr>
+                    <th>Email:</th>
+                    <td>{{ consumer.e_mail }}</td>
+                </tr>
+                <tr>
+                    <th>Phone:</th>
+                    <td>{{ consumer.phone }}</td>
+                </tr>
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ consumer.address }}</td>
+                </tr>
+            </table>
+            
+            <h3 class="mt-4">Associated Apartments in {{ house.address }}</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Apartment Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apartment in consumer.apartment_set.all %}
+                    {% if apartment.address.id == house_id %}
+                    <tr>
+                        <td>{{ apartment.apartment_nr }}</td>
+                        <td>
+                            <a href="{% url 'apartment_detail' house_id apartment.id %}" class="btn btn-sm btn-info">View</a>
+                            <a href="{% url 'apartment_update' house_id apartment.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">No apartments assigned in this house</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

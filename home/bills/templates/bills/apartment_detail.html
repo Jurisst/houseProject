@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Apartment Details - {{ house.address }}</h2>
+            <div>
+                <a href="{% url 'apartments_by_house' house.id %}" class="btn btn-secondary">Back to Apartments</a>
+                <a href="{{ edit_url }}" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Apartment Number:</th>
+                    <td>{{ apartment.apartment_nr }}</td>
+                </tr>
+                <tr>
+                    <th>House:</th>
+                    <td>{{ apartment.address.address }}</td>
+                </tr>
+                <tr>
+                    <th>Area:</th>
+                    <td>{{ apartment.area }}</td>
+                </tr>
+                <tr>
+                    <th>Heated Area:</th>
+                    <td>{{ apartment.heated_area }}</td>
+                </tr>
+                <tr>
+                    <th>Living Person Count:</th>
+                    <td>{{ apartment.living_person_count }}</td>
+                </tr>
+                <tr>
+                    <th>Consumer:</th>
+                    <td>{{ apartment.consumer.name|default:"No consumer assigned" }}</td>
+                </tr>
+            </table>
+            
+            <div class="mt-4">
+                <a href="{% url 'meters_by_apartment' apartment.id house.id %}" class="btn btn-info">View Meters</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block sidebar %}
 <aside class="vertical-menu">
-    <a href="{% url 'incoming_bill_detail' bill.id %}">Back to Bill Details</a>
+    <a href="{% url 'incoming_bill_detail' house.id bill.pk %}">Back to Bill Details</a>
     <a href="{% url 'incoming_bills' house.id %}">Back to Bills</a>
     <a href="{% url 'house_update' house.id %}">Back to House</a>
     <a href="{% url 'index' %}">Back to Start</a>
@@ -22,7 +22,7 @@
                     {{ form.as_p }}
                 </div>
                 <button type="submit" class="btn btn-primary">Update</button>
-                <a href="{% url 'incoming_bill_detail' bill.pk %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'incoming_bill_detail' house.id bill.pk %}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>

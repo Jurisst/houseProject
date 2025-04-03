@@ -1,6 +1,5 @@
 from django.views.decorators.cache import cache_control
 from django.views.generic import ListView, UpdateView, DetailView
-from django.views.generic import ListView, UpdateView, DetailView
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect,  get_object_or_404
 from .forms import ProviderForm, ServiceForm, HouseForm, ConsumerForm, ApartmentForm, MeterForm, ApartmentForm2, \
@@ -154,29 +153,15 @@ class HouseListView(ListView):
     context_object_name = "houses"
     ordering = "address"
 
-class HouseUpdateView(UpdateView):
+class HouseDetailView(DetailView):
     model = House
-    form_class = HouseForm
-    template_name_suffix = "_update_form"
+    template_name = 'bills/house_detail.html'
+    context_object_name = 'house'
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Calculate the number of apartments
-        apartment_count = Apartment.objects.filter(address=self.object).count()
-        # Set the initial value for the apartment_count field
-        form.fields['apartment_count'].initial = apartment_count
-        # Calculate total area from apartments
-        total_area = Apartment.objects.filter(address=self.object).aggregate(Sum('area'))['area__sum'] or 0
-        form.fields['area_of_apartments_total'].initial = total_area
-        form.fields['area_of_apartments_total'].widget.attrs['readonly'] = True
-        # Calculate total heated area from apartments
-        total_heated_area = Apartment.objects.filter(address=self.object).aggregate(Sum('heated_area'))['heated_area__sum'] or 0
-        form.fields['area_of_apartments_heated_total'].initial = total_heated_area
-        form.fields['area_of_apartments_heated_total'].widget.attrs['readonly'] = True
-        return form
-
-    def get_success_url(self):
-        return reverse_lazy('houses')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['edit_url'] = reverse_lazy('house_update', kwargs={'pk': self.object.pk})
+        return context
 
 
 class ProviderListView(ListView):
@@ -185,13 +170,15 @@ class ProviderListView(ListView):
     context_object_name = "providers"
 
 
-class ProviderUpdateView(UpdateView):
+class ProviderDetailView(DetailView):
     model = Provider
-    fields = '__all__'
-    template_name_suffix = "_update_form"
+    template_name = 'bills/provider_detail.html'
+    context_object_name = 'provider'
 
-    def get_success_url(self):
-        return reverse_lazy('providers')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['edit_url'] = reverse_lazy('provider_update', kwargs={'pk': self.object.pk})
+        return context
 
 
 class ServiceListView(ListView):
@@ -200,21 +187,24 @@ class ServiceListView(ListView):
     context_object_name = "services"
 
 
-class ServiceUpdateView(UpdateView):
+class ServiceDetailView(DetailView):
     model = Service
-    fields = '__all__'
-    template_name_suffix = "_update_form"
-
-    def get_success_url(self):
-        # Get the house ID from the service object
-        house_id = self.object.house.id
-        return reverse_lazy('services_by_house', kwargs={'house_id': house_id})
+    template_name = 'bills/service_detail.html'
+    context_object_name = 'service'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add house to context so it can be used in template
         context['house'] = self.object.house
+        context['edit_url'] = reverse_lazy('service_update', kwargs={'pk': self.object.pk, 'house_id': self.object.house.id})
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the service and check if it belongs to the house
+        service = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or service.house.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ApartmentListView(ListView):
@@ -224,24 +214,27 @@ class ApartmentListView(ListView):
     ordering = ['apartment_nr']
 
 
-class ApartmentUpdateView(UpdateView):
+class ApartmentDetailView(DetailView):
     model = Apartment
-    form_class = ApartmentForm2
-    template_name_suffix = "_update_form"
+    template_name = 'bills/apartment_detail.html'
     context_object_name = 'apartment'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['initial'] = {'address': self.kwargs.get('house_id')}
-        return kwargs
-
-    def get_success_url(self):
-        return reverse_lazy('apartments_by_house', kwargs={'house_id': self.object.address.id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['house'] = self.object.address
+        context['edit_url'] = reverse_lazy('apartment_update', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.address.id
+        })
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the apartment and check if it belongs to the house
+        apartment = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or apartment.address.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ConsumerListView(ListView):
@@ -250,13 +243,28 @@ class ConsumerListView(ListView):
     context_object_name = "consumers"
 
 
-class ConsumerUpdateView(UpdateView):
+class ConsumerDetailView(DetailView):
     model = Consumer
-    fields = '__all__'
-    template_name_suffix = "_update_form"
+    template_name = 'bills/consumer_detail.html'
+    context_object_name = 'consumer'
 
-    def get_success_url(self):
-        return reverse_lazy('consumers')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        house_id = self.kwargs.get('house_id')
+        context['house_id'] = house_id
+        context['edit_url'] = reverse_lazy('consumer_update', kwargs={
+            'pk': self.object.pk,
+            'house_id': house_id
+        })
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the consumer and check if they have apartments in the house
+        consumer = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or not consumer.apartment_set.filter(address_id=house_id).exists():
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class MeterListView(ListView):
@@ -265,13 +273,28 @@ class MeterListView(ListView):
     context_object_name = "meters"
 
 
-class MeterUpdateView(UpdateView):
+class MeterDetailView(DetailView):
     model = Meter
-    fields = '__all__'
-    template_name_suffix = "_update_form"
+    template_name = 'bills/meter_detail.html'
+    context_object_name = 'meter'
 
-    def get_success_url(self):
-        return reverse_lazy('meters')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['house'] = self.object.apartment_number.address
+        context['apartment'] = self.object.apartment_number
+        context['edit_url'] = reverse_lazy('meter_update', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.apartment_number.address.id
+        })
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the meter and check if it belongs to the house
+        meter = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or meter.apartment_number.address.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class IncomingBillListView(ListView):
@@ -304,8 +327,7 @@ class IncomingBillDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        bill = self.get_object()
-        context['house'] = bill.house
+        context['edit_url'] = reverse_lazy('incoming_bill_update', kwargs={'pk': self.object.pk})
         return context
 
 
@@ -620,13 +642,20 @@ def add_meter_to_apartment(request, apartment_id, text=None):
     
 
 @login_required
-def meters_by_apartment(request, apartment_id):
+def meters_by_apartment(request, apartment_id, house_id):
     apartment = get_object_or_404(Apartment, id=apartment_id)
+    house = get_object_or_404(House, id=house_id)
+    
+    # Verify apartment belongs to house
+    if apartment.address.id != house.id:
+        return redirect('index')
+        
     apartment_meters = Meter.objects.filter(apartment_number=apartment.id)
     
     context = {
         'apartment': apartment,
         'apartment_meters': apartment_meters,
+        'house': house
     }
     return render(request, 'bills/meters_by_apartment.html', context)
 
@@ -853,6 +882,7 @@ def login_view(request):
     return render(request, 'bills/login.html')
 
 def logout_view(request):
+    messages.get_messages(request).used = True  # Clear any existing messages
     logout(request)
     return redirect('login')
 
@@ -934,7 +964,7 @@ def calculate_total_bills(request, house_id):
         public_positions = []
         individual_positions = []
         total_amount = 0
-
+        monthly_consumption = 0
         if object_count_bills:
             total_amount = calculate_object_count_bills(house, object_count_bills, public_positions, apartments, Service, total_amount)
         if living_person_bills: 
@@ -945,16 +975,18 @@ def calculate_total_bills(request, house_id):
             total_amount = calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount)
         # Calculate volume services
         if volume_bills:
-            total_amount = calculate_volume_services(
+            total_amount, monthly_consumption = calculate_volume_services(
                 volume_bills,
                 apartment,
                 selected_year,
                 selected_month,
                 individual_positions,
                 Service,
-                total_amount
+                total_amount,
+                monthly_consumption
             )
-        print(total_amount)            
+        print(f"Total amount: {total_amount}")
+        print(f"Monthly consumption: {monthly_consumption}")            
 
         apartment_bills[apartment] = {
             'public_positions': public_positions,
@@ -1022,9 +1054,9 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     elements.append(Spacer(1, 20))
     
     # Prepare data for tables
-    public_data = [['Service', 'Quantity', 'Units', 'Price/Unit', 'Amount']]
-    individual_data = [['Service', 'Meter', 'Consumption', 'Units', 'Price/Unit', 'Amount']]
-    
+    public_data = ['Service', 'Quantity', 'Units', 'Price/Unit', 'Amount']
+    individual_data = ['Service', 'Meter', 'Consumption', 'Units', 'Price/Unit', 'Amount']
+    monthly_consumption = 0    
     total_amount = 0
     
     # Object count services
@@ -1158,3 +1190,134 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     response['Content-Disposition'] = f'attachment; filename="bill_{apartment.apartment_nr}_{year}_{month}.pdf"'
     response.write(pdf)
     return response
+
+class HouseUpdateView(UpdateView):
+    model = House
+    form_class = HouseForm
+    template_name_suffix = "_update_form"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Calculate the number of apartments
+        apartment_count = Apartment.objects.filter(address=self.object).count()
+        # Set the initial value for the apartment_count field
+        form.fields['apartment_count'].initial = apartment_count
+        # Calculate total area from apartments
+        total_area = Apartment.objects.filter(address=self.object).aggregate(Sum('area'))['area__sum'] or 0
+        form.fields['area_of_apartments_total'].initial = total_area
+        form.fields['area_of_apartments_total'].widget.attrs['readonly'] = True
+        # Calculate total heated area from apartments
+        total_heated_area = Apartment.objects.filter(address=self.object).aggregate(Sum('heated_area'))['heated_area__sum'] or 0
+        form.fields['area_of_apartments_heated_total'].initial = total_heated_area
+        form.fields['area_of_apartments_heated_total'].widget.attrs['readonly'] = True
+        return form
+
+    def get_success_url(self):
+        return reverse_lazy('house_detail', kwargs={'pk': self.object.pk})
+
+class ProviderUpdateView(UpdateView):
+    model = Provider
+    fields = '__all__'
+    template_name_suffix = "_update_form"
+
+    def get_success_url(self):
+        return reverse_lazy('provider_detail', kwargs={'pk': self.object.pk})
+
+class ServiceUpdateView(UpdateView):
+    model = Service
+    form_class = ServiceForm2
+    template_name_suffix = "_update_form"
+
+    def get_success_url(self):
+        return reverse_lazy('service_detail', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.house.id
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['house'] = self.object.house
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the service and check if it belongs to the house
+        service = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or service.house.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
+
+class ApartmentUpdateView(UpdateView):
+    model = Apartment
+    form_class = ApartmentForm2
+    template_name_suffix = "_update_form"
+    context_object_name = 'apartment'
+
+    def get_success_url(self):
+        return reverse_lazy('apartment_detail', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.address.id
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['house'] = self.object.address
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the apartment and check if it belongs to the house
+        apartment = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or apartment.address.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
+
+class ConsumerUpdateView(UpdateView):
+    model = Consumer
+    fields = '__all__'
+    template_name_suffix = "_update_form"
+
+    def get_success_url(self):
+        return reverse_lazy('consumer_detail', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.kwargs.get('house_id')
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['house_id'] = self.kwargs.get('house_id')
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the consumer and check if they have apartments in the house
+        consumer = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or not consumer.apartment_set.filter(address_id=house_id).exists():
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
+
+class MeterUpdateView(UpdateView):
+    model = Meter
+    fields = '__all__'
+    template_name_suffix = "_update_form"
+
+    def get_success_url(self):
+        return reverse_lazy('meter_detail', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.apartment_number.address.id,
+            'apartment_id': self.object.apartment_number.id
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['house'] = self.object.apartment_number.address
+        context['apartment'] = self.object.apartment_number
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the meter and check if it belongs to the house
+        meter = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or meter.apartment_number.address.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
