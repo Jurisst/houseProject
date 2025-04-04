@@ -1,30 +1,37 @@
-
 {% extends 'base.html' %}
 
-    {% block title %} Update apartment  {% endblock %}
+{% block title %} Update apartment {% endblock %}
 
-    {% block sidebar %}
-    <aside class="vertical-menu">
-        <a href="{% url 'meters_by_apartment' house.id apartment.id %}">Meters here</a>
-        <a href="{% url 'add_meter_to_apartment' house.id apartment.id %}">Add Meter</a>
-        <a href="{% url 'apartments_by_house' house.id %}">Back to apartments</a>
-        <a href="{% url 'index' %}">Back to start</a>
-        <a href="#">Profile</a>
-        <a href="#">Settings</a>
-        <a href="#">Logout</a>
-    </aside>
-    {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'meters_by_apartment' house.id apartment.id %}">Meters here</a>
+    <a href="{% url 'add_meter_to_apartment' house.id apartment.id %}">Add Meter</a>
+    <a href="{% url 'apartments_by_house' house.id %}">Back to apartments</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
 
-    {% block content %}
-    <h2>Update apartment info in {{ house.address }}</h2>
-
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Save information</button>
-    </form>
-      {% if err %}
-        <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
-      {% endif %}
-
-    {% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Update Apartment Information in {{ house.address }}</h2>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <table class="table">
+                    {{ form.as_table }}
+                </table>
+                <button type="submit" class="btn btn-primary">Save Information</button>
+            </form>
+            {% if err %}
+                <div class="alert alert-danger mt-3">{{err|safe}}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,19 @@
 {% extends 'base.html' %}
 
+{% block title %} Apartment Details {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'meters_by_apartment' house.id apartment.id %}">Meters here</a>
+    <a href="{% url 'add_meter_to_apartment' house.id apartment.id %}">Add Meter</a>
+    <a href="{% url 'apartments_by_house' house.id %}">Back to apartments</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="card">
@@ -39,7 +53,7 @@
             </table>
             
             <div class="mt-4">
-                <a href="{% url 'meters_by_apartment' apartment.id house.id %}" class="btn btn-info">View Meters</a>
+                <a href="{% url 'meters_by_apartment' house.id apartment.id %}" class="btn btn-info">View Meters</a>
             </div>
         </div>
     </div>

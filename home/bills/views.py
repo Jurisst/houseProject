@@ -327,8 +327,20 @@ class IncomingBillDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['edit_url'] = reverse_lazy('incoming_bill_update', kwargs={'pk': self.object.pk})
+        context['house'] = self.object.house
+        context['edit_url'] = reverse_lazy('incoming_bill_update', kwargs={
+            'pk': self.object.pk,
+            'house_id': self.object.house.id
+        })
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Get the bill and check if it belongs to the house
+        bill = self.get_object()
+        house_id = self.kwargs.get('house_id')
+        if not house_id or bill.house.id != int(house_id):
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class IncomingBillUpdateView(UpdateView):
@@ -607,10 +619,10 @@ def houses_services(request, house_id):
 
 
 @login_required
-def add_meter_to_apartment(request, apartment_id, text=None):
+def add_meter_to_apartment(request, house_id, apartment_id, text=None):
     apartment = get_object_or_404(Apartment, id=apartment_id)
     meters = Meter.objects.filter(apartment_number=apartment.id)
-    house = get_object_or_404(House, id=apartment.address.id)
+    house = get_object_or_404(House, id=house_id)
     apartment_meters_list = []
     for meter in meters:
         meter_info = meter.manufacturer, meter.series, meter.number

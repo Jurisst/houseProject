@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% block title %}Meters in {{ house.address }}{% endblock %}
 
 {% block sidebar %}
 <aside class="vertical-menu">
@@ -11,43 +12,58 @@
 </aside>
 {% endblock %}
 
-
 {% block content %}
-    <h2>Meters in {{ house.address }}</h2>
-    
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Apartment</th>
-                <th>Manufacturer</th>
-                <th>Series</th>
-                <th>Number</th>
-                <th>Service Type</th>
-                <th>Verification Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for meter in house_meters %}
-                <tr>
-                    <td>{{ meter.apartment_number.apartment_nr }}</td>
-                    <td>{{ meter.manufacturer }}</td>
-                    <td>{{ meter.series }}</td>
-                    <td>{{ meter.number }}</td>
-                    <td>{{ meter.type }}</td>
-                    <td>{{ meter.verification_date }}</td>
-                    <td>
-                        <a href="{% url 'add_meter_reading' meter_id=meter.id house_id=house.id %}" class="btn btn-sm btn-primary">Add Reading</a>
-                        <a href="{% url 'meters_by_apartment' apartment_id=meter.apartment_number.id house_id=house.id %}" class="btn btn-sm btn-info">View Apartment Meters</a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7">No meters found for this house.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{% url 'house_update' house.id %}" class="btn btn-primary">Back to House</a>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Meters in {{ house.address }}</h2>
+            <a href="{% url 'house_update' house.id %}" class="btn btn-primary">Back to House</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Apartment</th>
+                            <th>Manufacturer</th>
+                            <th>Series</th>
+                            <th>Number</th>
+                            <th>Service Type</th>
+                            <th>Verification Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meter in house_meters %}
+                            <tr>
+                                <td>{{ meter.apartment_number.apartment_nr }}</td>
+                                <td>{{ meter.manufacturer }}</td>
+                                <td>{{ meter.series }}</td>
+                                <td>{{ meter.number }}</td>
+                                <td>{{ meter.type }}</td>
+                                <td>{{ meter.verification_date }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'add_meter_reading' meter_id=meter.id house_id=house.id %}" 
+                                           class="btn btn-sm btn-primary">Add Reading</a>
+                                        <a href="{% url 'meters_by_apartment' apartment_id=meter.apartment_number.id house_id=house.id %}" 
+                                           class="btn btn-sm btn-info">View Apartment Meters</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="alert alert-info">
+                                        No meters found for this house.
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

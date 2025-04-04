@@ -1,22 +1,32 @@
 {% extends 'base.html' %}
 
-{% block title %} House added {% endblock %}
+{% block title %} House Added Successfully {% endblock %}
 
 {% block sidebar %}
 <aside class="vertical-menu">
-
-<a href="/bills/add_house">Add another house</a>
-<a href='/bills/houses' >Back to houses</a>
-
-
+    <a href="/bills/add_house">Add another house</a>
+    <a href='/bills/houses'>Back to houses</a>
+    <a href="{% url 'index' %}">Back to start</a>
 </aside>
 {% endblock %}
 
-
 {% block content %}
-
-<h1>Success!</h1>
-<p>House has been saved</p>
-
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Success!</h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                House has been saved successfully.
+            </div>
+            <div class="mt-3">
+                <a href="/bills/add_house" class="btn btn-primary">Add Another House</a>
+                <a href='/bills/houses' class="btn btn-secondary">Back to Houses</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 

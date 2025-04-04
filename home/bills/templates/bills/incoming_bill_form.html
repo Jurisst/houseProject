@@ -3,7 +3,6 @@
 
 {% block title %}Add incoming bill{% endblock %}
 
-
 {% block sidebar %}
 <aside class="vertical-menu">
     {% if house %}
@@ -14,19 +13,29 @@
     <a href="{% url 'index' %}">Back to start</a>
 </aside>
 {% endblock %}
-{% block content %}
-{% if house %}
-    <h1>Add incoming bill for {{ house.address }}</h1>
-{% else %}
-    <h1>Add incoming bill</h1>
-{% endif %}
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Add Incoming bill</button>
-</form>
-  {% if err %}
-    <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
-  {% endif %}
 
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            {% if house %}
+                <h2>Add Incoming Bill for {{ house.address }}</h2>
+            {% else %}
+                <h2>Add Incoming Bill</h2>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <table class="table">
+                    {{ form.as_table }}
+                </table>
+                <button type="submit" class="btn btn-primary">Add Incoming Bill</button>
+            </form>
+            {% if err %}
+                <div class="alert alert-danger mt-3">{{err|safe}}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %} 

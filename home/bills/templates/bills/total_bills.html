@@ -19,139 +19,145 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h2 class="mb-4">{% translate "Total Bills" %} - {{ house.address }}</h2>
-
-    <!-- Period selector -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <form method="get" class="form-inline">
-                <div class="form-group mr-2">
-                    <label for="year" class="mr-2">{% translate "Year" %}:</label>
-                    <select name="year" id="year" class="form-control">
-                        {% for year in available_years %}
-                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group mr-2">
-                    <label for="month" class="mr-2">{% translate "Month" %}:</label>
-                    <select name="month" id="month" class="form-control">
-                        {% for month in months %}
-                            <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">{% translate "Show" %}</button>
-            </form>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>{% translate "Total Bills" %} - {{ house.address }}</h2>
         </div>
-    </div>
-
-    {% if apartment_bills %}
-        {% for apartment, bill_data in apartment_bills.items %}
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{% translate "Apartment" %} {{ apartment.apartment_nr }}</h5>
-                    <a href="{% url 'generate_apartment_bill_pdf' house.id apartment.id selected_year selected_month %}" 
-                       class="btn btn-sm btn-primary">
-                        {% translate "Download PDF" %}
-                    </a>
-                </div>
-                <div class="card-body d-flex flex-column gap-3 align-items-end">
-                    {% if bill_data.public_positions %}
-                        <h6>{% translate "Object Count Services" %}</h6>
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>{% translate "Service" %}</th>
-                                    <th>{% translate "Quantity" %}</th>
-                                    <th>{% translate "Pay for unit" %}</th>
-                                    <th>{% translate "Calculation" %}</th>
-                                    <th>{% translate "Amount" %}</th>
-                                    <th>{% translate "VAT" %}</th>
-                                    <th>{% translate "Total" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for position in bill_data.public_positions %}
-                                    <tr>
-                                        <td>{{ position.service }}</td>
-                                        <td>{{ position.quantity }} {{ position.measuring_units }}</td>
-                                        <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
-                                        <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }}</td>
-                                        <td>{{ position.amount|floatformat:2 }} €</td>
-                                        <td>{{ position.vat_amount|floatformat:2 }} €</td>
-                                        <td>{{ position.total|floatformat:2 }} €</td>
-                                    </tr>
+        <div class="card-body">
+            <!-- Period selector -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="get" class="form-inline">
+                        <div class="form-group mb-2">
+                            <label for="year" class="form-label">{% translate "Year" %}:</label>
+                            <select name="year" id="year" class="form-select">
+                                {% for year in available_years %}
+                                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endif %}
-
-                    {% if bill_data.individual_positions %}
-                        <h6>{% translate "Individual Services" %}</h6>
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>{% translate "Service" %}</th>
-                                    <th>{% translate "Meter" %}</th>
-                                    <th>{% translate "Previous Reading" %}</th>
-                                    <th>{% translate "Current Reading" %}</th>
-                                    <th>{% translate "Consumption" %}</th>
-                                    <th>{% translate "Price per Unit" %}</th>
-                                    <th>{% translate "Amount" %}</th>
-                                    <th>{% translate "VAT" %}</th>
-                                    <th>{% translate "Total" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for position in bill_data.individual_positions %}
-                                    <tr>
-                                        <td>{{ position.service }}</td>
-                                        <td>{{ position.meter }}</td>
-
-                                        <td>
-                                            {% if position.prev_reading %}
-                                                {{ position.prev_reading.reading_value }}
-                                            {% else %}
-                                                <span class="text-warning">{% translate "No data" %}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if position.current_reading %}
-                                                {{ position.current_reading.reading_value }}
-                                            {% else %}
-                                                <span class="text-warning">{% translate "No data" %}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {{ position.consumption }} {{ position.measuring_units }}
-                                        </td>
-                                        <td>{{ position.price_per_unit|floatformat:2 }} € </td>
-                                        <td>{{ position.amount|floatformat:2 }} € </td>
-                                        <td>{{ position.vat_amount|floatformat:2 }} € </td>
-                                        <td>{{ position.total|floatformat:2 }} €</td>
-                                    </tr>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="month" class="form-label">{% translate "Month" %}:</label>
+                            <select name="month" id="month" class="form-select">
+                                {% for month in months %}
+                                    <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                        {% if not bill_data.individual_positions %}
-                            <div class="alert alert-warning">
-                                {% translate "No individual services found for this period." %}
-                            </div>
-                        {% endif %}
-                    {% endif %}
-
-                    <div class="text-right mt-3">
-                        <strong>{% translate "Total Amount" %}: {{ bill_data.total }} € </strong>
-                    </div>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">{% translate "Show" %}</button>
+                    </form>
                 </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-info">
-            {% translate "No bills found for this period." %}
+
+            {% if apartment_bills %}
+                {% for apartment, bill_data in apartment_bills.items %}
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{% translate "Apartment" %} {{ apartment.apartment_nr }}</h5>
+                            <a href="{% url 'generate_apartment_bill_pdf' house.id apartment.id selected_year selected_month %}" 
+                               class="btn btn-sm btn-primary">
+                                {% translate "Download PDF" %}
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if bill_data.public_positions %}
+                                <h6 class="mb-3">{% translate "Object Count Services" %}</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>{% translate "Service" %}</th>
+                                                <th>{% translate "Quantity" %}</th>
+                                                <th>{% translate "Pay for unit" %}</th>
+                                                <th>{% translate "Calculation" %}</th>
+                                                <th>{% translate "Amount" %}</th>
+                                                <th>{% translate "VAT" %}</th>
+                                                <th>{% translate "Total" %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for position in bill_data.public_positions %}
+                                                <tr>
+                                                    <td>{{ position.service }}</td>
+                                                    <td>{{ position.quantity }} {{ position.measuring_units }}</td>
+                                                    <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
+                                                    <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }}</td>
+                                                    <td>{{ position.amount|floatformat:2 }} €</td>
+                                                    <td>{{ position.vat_amount|floatformat:2 }} €</td>
+                                                    <td>{{ position.total|floatformat:2 }} €</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+
+                            {% if bill_data.individual_positions %}
+                                <h6 class="mb-3 mt-4">{% translate "Individual Services" %}</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>{% translate "Service" %}</th>
+                                                <th>{% translate "Meter" %}</th>
+                                                <th>{% translate "Previous Reading" %}</th>
+                                                <th>{% translate "Current Reading" %}</th>
+                                                <th>{% translate "Consumption" %}</th>
+                                                <th>{% translate "Price per Unit" %}</th>
+                                                <th>{% translate "Amount" %}</th>
+                                                <th>{% translate "VAT" %}</th>
+                                                <th>{% translate "Total" %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for position in bill_data.individual_positions %}
+                                                <tr>
+                                                    <td>{{ position.service }}</td>
+                                                    <td>{{ position.meter }}</td>
+                                                    <td>
+                                                        {% if position.prev_reading %}
+                                                            {{ position.prev_reading.reading_value }}
+                                                        {% else %}
+                                                            <span class="text-warning">{% translate "No data" %}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if position.current_reading %}
+                                                            {{ position.current_reading.reading_value }}
+                                                        {% else %}
+                                                            <span class="text-warning">{% translate "No data" %}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ position.consumption }} {{ position.measuring_units }}</td>
+                                                    <td>{{ position.price_per_unit|floatformat:2 }} € </td>
+                                                    <td>{{ position.amount|floatformat:2 }} € </td>
+                                                    <td>{{ position.vat_amount|floatformat:2 }} € </td>
+                                                    <td>{{ position.total|floatformat:2 }} €</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if not bill_data.individual_positions %}
+                                    <div class="alert alert-warning">
+                                        {% translate "No individual services found for this period." %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                            <div class="text-end mt-3">
+                                <strong>{% translate "Total Amount" %}: {{ bill_data.total }} € </strong>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    {% translate "No bills found for this period." %}
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 </div>
 {% endblock %} 

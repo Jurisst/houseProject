@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
 
+{% block title %} Service Details {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'services_by_house' house.id %}">Back to Services</a>
+    <a href="{% url 'house_detail' house.id %}">Back to House</a>
+    <a href="{% url 'index' %}">Back to Start</a>
+</aside>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="card">
@@ -11,28 +21,32 @@
             </div>
         </div>
         <div class="card-body">
-            <table class="table">
-                <tr>
-                    <th>Name:</th>
-                    <td>{{ service.name }}</td>
-                </tr>
-                <tr>
-                    <th>Service Type:</th>
-                    <td>{{ service.service_type }}</td>
-                </tr>
-                <tr>
-                    <th>Measuring Units:</th>
-                    <td>{{ service.measuring_units }}</td>
-                </tr>
-                <tr>
-                    <th>Price per Unit:</th>
-                    <td>{{ service.price_per_unit }}</td>
-                </tr>
-                <tr>
-                    <th>House:</th>
-                    <td>{{ service.house.address }}</td>
-                </tr>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="table-light">Name:</th>
+                            <td>{{ service.name }}</td>
+                        </tr>
+                        <tr>
+                            <th class="table-light">Service Type:</th>
+                            <td>{{ service.service_type }}</td>
+                        </tr>
+                        <tr>
+                            <th class="table-light">Measuring Units:</th>
+                            <td>{{ service.measuring_units }}</td>
+                        </tr>
+                        <tr>
+                            <th class="table-light">Price per Unit:</th>
+                            <td>{{ service.price_per_unit }}</td>
+                        </tr>
+                        <tr>
+                            <th class="table-light">House:</th>
+                            <td>{{ service.house.address }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

@@ -1,34 +1,37 @@
-
 {% extends 'base.html' %}
 
-    {% block title %} Update meter {% endblock %}
+{% block title %} Update meter {% endblock %}
 
-    {% block sidebar %}
-    <aside class="vertical-menu">
-        <a href="{% url 'add_meter_reading' meter.id %}">Add new meter reading</a>
-        <a href="{% url 'add_meter' %}">Add new meter</a>
-        <a href="{% url 'meters' %}">Back</a>
-        <a href="{% url 'index' %}">Back to start</a>
-        <a href="#">Profile</a>
-        <a href="#">Settings</a>
-        <a href="#">Logout</a>
-    </aside>
-    {% endblock %}
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'add_meter_reading' meter.id %}">Add new meter reading</a>
+    <a href="{% url 'add_meter' %}">Add new meter</a>
+    <a href="{% url 'meters' %}">Back</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
 
-    {% block content %}
-    <h2>Update meter info</h2>
-
-    <form method="post">
-      {% csrf_token %}
-
-
-      {{ form.as_p }}
-
-
-      <button type="submit">Save information</button>
-    </form>
-      {% if err %}
-        <div id="error" style="border: blue 2px solid; background-color: #E62600; color:white; display: inline-block">{{err|safe}}</div>
-      {% endif %}
-
-    {% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Update Meter Information</h2>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <table class="table">
+                    {{ form.as_table }}
+                </table>
+                <button type="submit" class="btn btn-primary">Save Information</button>
+            </form>
+            {% if err %}
+                <div class="alert alert-danger mt-3">{{err|safe}}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

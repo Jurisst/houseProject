@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
+{% block title %} Consumer Details {% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'add_consumer' %}">Add Consumer</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="card">

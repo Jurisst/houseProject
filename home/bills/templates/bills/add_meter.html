@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %} Add meter {% endblock %}
+{% block title %}Add Meter{% endblock %}
+
 {% block sidebar %}
 <aside class="vertical-menu">
     {% if apartment %}
-
-    <a href="{% url 'add_meter_to_apartment' apartment.id %}">Add another meter</a>
-    <a href="{% url 'meters_by_apartment' apartment.id %}">Back to meters</a>
-    <a href="{% url 'apartment_update' house.id apartment.id %}">Back to apartment</a>
+    <a href="{% url 'add_meter_to_apartment' house.id apartment.id %}">Add another meter</a>
+    <a href="{% url 'meters_by_apartment' house.id apartment.id %}">Back to meters</a>
+    <a href="{% url 'apartment_detail' house.id apartment.id %}">Back to apartment</a>
     {% endif %}
     <a href="#">Profile</a>
     <a href="#">Settings</a>
@@ -16,19 +16,44 @@
 {% endblock %}
 
 {% block content %}
-    {% if apartment %}
-        <h2>Add Meter to {{ apartment.address }}, apartment {{ apartment.apartment_nr }}</h2>
-    {% else %}
-        <h2>Add New Meter</h2>
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add Meter</button>
-    </form>
-
-    {% if err %}
-        {{ err|safe }}
-    {% endif %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            {% if apartment %}
+                <h2>Add Meter to {{ apartment.address }}, apartment {{ apartment.apartment_nr }}</h2>
+            {% else %}
+                <h2>Add New Meter</h2>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="row g-3">
+                    {% for field in form %}
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                {{ field }}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary">Add Meter</button>
+                </div>
+            </form>
+            {% if err %}
+                <div class="alert alert-danger mt-3">{{ err|safe }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %} 

@@ -24,7 +24,7 @@ urlpatterns = [
     path('add_incoming_bill', views.add_incoming_bill, name='add_incoming'), 
 
     # Detail views with house context
-    path("houses/<int:house_id>/", views.HouseDetailView.as_view(), name='house_detail'),
+    path("houses/<int:pk>/", views.HouseDetailView.as_view(), name='house_detail'),
     path("houses/<int:house_id>/services/<slug:pk>/", views.ServiceDetailView.as_view(), name='service_detail'),
     path("houses/<int:house_id>/apartments/<slug:pk>/", views.ApartmentDetailView.as_view(), name='apartment_detail'),
     path("houses/<int:house_id>/meters/<slug:pk>/", views.MeterDetailView.as_view(), name='meter_detail'),
@@ -47,6 +47,7 @@ urlpatterns = [
     path('houses/<int:house_id>/apartments/<int:apartment_id>/add_meter', views.add_meter_to_apartment, name='add_meter_to_apartment'),
     path('houses/<int:house_id>/add_incoming_bill', views.add_incoming_bill, name='add_incoming'),
     path('houses/<int:house_id>/meters/<int:meter_id>/add-reading/', views.add_meter_reading, name='add_meter_reading'),
+
     # House related views
     path("houses/<int:house_id>/apartments/", views.houses_apartments, name='apartments_by_house'),
     path("houses/<int:house_id>/services/", views.houses_services, name='services_by_house'),

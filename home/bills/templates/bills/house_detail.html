@@ -1,31 +1,71 @@
 {% extends 'base.html' %}
 
+{% block title %}House Details{% endblock %}
+
+{% block sidebar %}
+<aside class="vertical-menu">
+    <a href="{% url 'apartments_by_house' house.id %}">Apartments here</a>
+    <a href="{% url 'services_by_house' house.id %}">Services here</a>
+    <a href="{% url 'meters_by_house' house.id %}">Meters here</a>
+    <a href="{% url 'consumers_by_house' house.id %}">Consumers here</a>
+    <a href="{% url 'incoming_bills' house.id %}">Incoming bills here</a>
+    <a href="{% url 'add_incoming' house.id %}">Create incoming bill</a>
+    <a href="{% url 'total_bills' house.id %}">Calculate Total Bills</a>
+    <a href="{% url 'add_house' %}">Add new house</a>
+    <a href="{% url 'houses' %}">Back</a>
+    <a href="{% url 'index' %}">Back to start</a>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+</aside>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2>House Details</h2>
-            <a href="{{ edit_url }}" class="btn btn-primary">Edit</a>
+            <div>
+                <a href="{{ edit_url }}" class="btn btn-primary">Edit House</a>
+            </div>
         </div>
         <div class="card-body">
-            <table class="table">
-                <tr>
-                    <th>Address:</th>
-                    <td>{{ house.address }}</td>
-                </tr>
-                <tr>
-                    <th>Total Area:</th>
-                    <td>{{ house.area_of_apartments_total }}</td>
-                </tr>
-                <tr>
-                    <th>Heated Area:</th>
-                    <td>{{ house.area_of_apartments_heated_total }}</td>
-                </tr>
-                <tr>
-                    <th>Number of Apartments:</th>
-                    <td>{{ house.apartment_count }}</td>
-                </tr>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%">Property</th>
+                            <th style="width: 70%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Address</td>
+                            <td>{{ house.address }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Area</td>
+                            <td>{{ house.area_of_apartments_total }}</td>
+                        </tr>
+                        <tr>
+                            <td>Heated Area</td>
+                            <td>{{ house.area_of_apartments_heated_total }}</td>
+                        </tr>
+                        <tr>
+                            <td>Number of Apartments</td>
+                            <td>{{ house.apartment_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Number of living persons</td>
+                            <td>{{ house.living_person_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Number of declared persons</td>
+                            <td>{{ house.declared_person_count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
