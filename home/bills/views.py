@@ -970,6 +970,14 @@ def calculate_total_bills(request, house_id):
         selected_month = datetime.now().month
         selected_year = datetime.now().year
 
+    # Calculate previous month for consumption calculations
+    if selected_month == 1:
+        prev_month = 12
+        prev_year = selected_year - 1
+    else:
+        prev_month = selected_month - 1
+        prev_year = selected_year
+
     # Get all incoming bills for the selected period
     incoming_bills = IncomingBill.objects.filter(
         house=house,
@@ -984,16 +992,38 @@ def calculate_total_bills(request, house_id):
     volume_bills = incoming_bills.filter(service__service_type='volume')
     area_bills = incoming_bills.filter(service__service_type='area')
 
+    # Get current month readings for water meters
+    current_readings = MeterReading.objects.filter(
+        meter__apartment_number__address=house,
+        meter__type__in=['cold', 'hot'],
+        reading_date__year=selected_year,
+        reading_date__month=selected_month
+    ).select_related('meter', 'meter__apartment_number')
+    
+    # Get previous month readings for water meters
+    prev_readings = MeterReading.objects.filter(
+        meter__apartment_number__address=house,
+        meter__type__in=['cold', 'hot'],
+        reading_date__year=prev_year,
+        reading_date__month=prev_month
+    ).select_related('meter', 'meter__apartment_number')
+    
+    # Create a dictionary of previous readings for quick lookup
+    prev_readings_dict = {
+        reading.meter_id: reading.reading_value 
+        for reading in prev_readings
+    }
+
+    # Calculate total house water consumption
+    house_water_consumption = 0
+    for reading in current_readings:
+        prev_reading = prev_readings_dict.get(reading.meter_id, reading.meter.reading_default)
+        consumption = reading.reading_value - prev_reading
+        house_water_consumption += consumption
+
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
-    house_total_consumption = []
-    meters_total_consumption = []
 
-    if volume_bills:
-        house_total_consumption = calculate_house_total_consumption(volume_bills, house_total_consumption)
-        print(f"House total consumption: {house_total_consumption}")
-        meters_total_consumption = calculate_meters_total_consumption(volume_bills, meters_total_consumption, selected_year, selected_month)
-        print(f"Meters total consumption: {meters_total_consumption}")
     for apartment in apartments:
         public_positions = []
         individual_positions = []
@@ -1008,6 +1038,7 @@ def calculate_total_bills(request, house_id):
             total_amount = calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
         if area_bills:
             total_amount = calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount)
+        
         # Calculate volume services
         if volume_bills:
             total_amount, monthly_consumption = calculate_volume_services(
@@ -1020,20 +1051,13 @@ def calculate_total_bills(request, house_id):
                 total_amount,
                 monthly_consumption
             )
-        # total_consumption += monthly_consumption
-        print(f"Total amount: {total_amount}")
-        print(f"Monthly consumption: {monthly_consumption}")            
-        print(f"Total house consumption: {house_total_consumption}")
-        print(f"Total meters consumption: {meters_total_consumption}")
+
         apartment_bills[apartment] = {
             'public_positions': public_positions,
             'individual_positions': individual_positions,
-            'total': round(total_amount, 2),
-            'total_consumption': house_total_consumption,
-            'meters_consumption': meters_total_consumption        
+            'total': round(total_amount, 2)
         }
-    # for apartment in apartment_bills:
-    #     apartment_bills[apartment]['water_difference'] = calculate_water_difference(volume_bills, individual_positions, house_total_consumption, total_amount, Service)
+        
     # Get available years from incoming bills
     available_years = list(IncomingBill.objects.filter(
         house=house
@@ -1052,6 +1076,7 @@ def calculate_total_bills(request, house_id):
         'selected_year': selected_year,
         'available_years': available_years,
         'months': range(1, 13),
+        'house_water_consumption': house_water_consumption
     }
     
     return render(request, 'bills/total_bills.html', context)

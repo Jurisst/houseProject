@@ -145,13 +145,16 @@
                                     </div>
                                 {% endif %}
                             {% endif %}
-
                             <div class="text-end mt-3">
                                 <strong>{% translate "Total Amount" %}: {{ bill_data.total }} € </strong>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
+
+                <div class="text-end mt-3">
+                    <strong>{% translate "House water consumption" %}: {{ house_water_consumption }} m3 </strong>
+                </div>
             {% else %}
                 <div class="alert alert-info">
                     {% translate "No bills found for this period." %}
