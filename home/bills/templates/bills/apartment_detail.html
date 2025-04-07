@@ -43,8 +43,42 @@
                     <td>{{ apartment.heated_area }}</td>
                 </tr>
                 <tr>
+                    {% if apartment.cold_water_meters_count > 0 %}
+                        <th>Count of cold water meters:</th>
+                        <td>{{ apartment.cold_water_meters_count }}</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% if apartment.hot_water_meters_count > 0 %}
+                        <th>Count of hot water meters:</th>
+                        <td>{{ apartment.hot_water_meters_count }}</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% if apartment.heat_meters_count > 0 %}
+                        <th>Count of heat meters:</th>
+                        <td>{{ apartment.heat_meters_count }}</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% if apartment.electricity_meters_count > 0 %}
+                        <th>Count of electricity meters:</th>
+                        <td>{{ apartment.electricity_meters_count }}</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% if apartment.gas_meters_count > 0 %}
+                        <th>Count of gas meters:</th>
+                        <td>{{ apartment.gas_meters_count }}</td>
+                    {% endif %}
+                </tr>
+                <tr>
                     <th>Living Person Count:</th>
                     <td>{{ apartment.living_person_count }}</td>
+                </tr>
+                <tr>
+                    <th>Declared Person Count:</th>
+                    <td>{{ apartment.declared_person_count }}</td>
                 </tr>
                 <tr>
                     <th>Consumer:</th>

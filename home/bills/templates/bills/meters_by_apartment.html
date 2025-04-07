@@ -4,7 +4,7 @@
 
 {% block sidebar %}
 <aside class="vertical-menu">
-    <a href="{% url 'apartment_update' house.id apartment.id %}">Back to apartment</a>
+    <a href="{% url 'apartment_detail' house.id apartment.id %}">Back to apartment</a>
     <a href="{% url 'add_meter_to_apartment' house.id apartment.id %}">Add Meter here</a>
     <a href="{% url 'apartments_by_house' house.id %}">Back to house apartments</a>
     <a href="{% url 'index' %}">Back to Start</a>

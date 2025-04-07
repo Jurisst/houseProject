@@ -6,7 +6,6 @@
 <aside class="vertical-menu">
     {% if house %}
         <a href="{% url 'add_incoming' house.id %}">Add incoming bill</a>
-        <a href="{% url 'add_incoming' %}">Add incoming bill</a>
         <a href="{% url 'house_update' house.id %}">Back to house</a>
     {% else %}
         <a href="{% url 'add_incoming' %}">Add incoming bill</a>
@@ -76,6 +75,10 @@
                     <td>{{ item.consumption|floatformat:3 }}</td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td colspan="4">{% translate "Total house consumption this month" %}</td>
+                    <td>{{ monthly_consumption|floatformat:3 }}</td>
+                </tr>
             </tbody>
         </table>
     </div>

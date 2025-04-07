@@ -62,4 +62,14 @@ urlpatterns = [
     path("houses/<int:house_id>/apartments/<int:apartment_id>/bill/<int:year>/<int:month>/pdf/", views.generate_apartment_bill_pdf, name='generate_apartment_bill_pdf'),
     path('houses/<int:house_id>/calculate-public-bills/', views.calculate_public_bills, name='calculate_public_bills'),
     
+    # Success pages
+    path('success_provider/<int:provider_id>/', views.success_add_provider, name='success_provider'),
+    path('success_service/<int:service_id>/', views.success_add_service, name='success_service'),
+    path('success_service/<int:house_id>/<int:service_id>/', views.success_add_service, name='success_service_with_house'),
+    path('success_house/<int:house_id>/', views.success_add_house, name='success_house'),
+    path('success_consumer/<int:consumer_id>/', views.success_add_consumer, name='success_consumer'),
+    path('success_apartment/<int:house_id>/<int:apartment_id>/', views.success_add_apartment, name='success_apartment'),
+    path('success_meter/<int:apartment_id>/<int:meter_id>/', views.success_add_meter, name='success_meter'),
+    path('success_meter/<int:house_id>/<int:apartment_id>/<int:meter_id>/', views.success_add_meter, name='success_meter_with_house'),
+    path('success_incoming/<int:house_id>/<int:incoming_bill_id>/', views.success_add_incoming, name='success_incoming'),
 ]

@@ -139,6 +139,7 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                     consumption = current_reading.reading_value - default_reading
                 else:
                     consumption = 0
+                    print(f"No consumption for {meter.apartment_number.apartment_nr} {meter.type} meter")
 
                 monthly_consumption += consumption
                 
@@ -162,3 +163,70 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                 total_amount += float(amount) + float(vat_amount)
                 
     return total_amount, monthly_consumption
+
+def calculate_house_total_consumption(volume_bills, house_total_consumption):
+    for bill in volume_bills:
+        house_total_consumption.append((bill.service.name, bill.quantity_received))
+    return house_total_consumption
+
+def calculate_meters_total_consumption(volume_bills, meters_total_consumption, selected_year, selected_month):
+    for bill in volume_bills:
+        meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
+        if meter_type:
+            meters = Meter.objects.filter(
+                type=meter_type
+            )   
+            for meter in meters:
+                default_reading = meter.reading_default
+                # Get current month reading
+                current_reading = MeterReading.objects.filter(
+                    meter=meter,
+                    reading_date__year=selected_year,
+                    reading_date__month=selected_month
+                ).first()
+                
+                # Get previous month reading
+                if selected_month == 1:
+                    prev_month = 12
+                    prev_year = selected_year - 1
+                else:
+                    prev_month = selected_month - 1
+                    prev_year = selected_year
+                    
+                prev_reading = MeterReading.objects.filter(
+                    meter=meter,
+                    reading_date__year=prev_year,
+                    reading_date__month=prev_month
+                ).first()
+                
+                if current_reading and prev_reading:
+                    consumption = current_reading.reading_value - prev_reading.reading_value
+                elif current_reading and not prev_reading:
+                    # assume that the previous reading is missing and the current reading is the first reading
+                    consumption = current_reading.reading_value - default_reading
+                else:
+                    consumption = 0
+                    print(f"No consumption for {meter.apartment_number.apartment_nr} {meter.type} meter")
+
+                meters_total_consumption.append((meter_type, consumption))
+            
+    return meters_total_consumption
+
+def calculate_water_difference(bills, individual_positions, total_consumption, total_amount, Service):
+    for bill in bills:
+        print(f"Bill: {bill.service.service_type}")
+        house = bill.house
+        if bill.service.name == 'cold_water':
+            if bill.quantity_received > total_consumption:
+                difference = (bill.quantity_received - total_consumption) / house.apartment_count
+                amount = difference * bill.service.price_per_unit
+                vat_amount = calculate_vat(bill, amount)
+                individual_positions.append({
+                    'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name) + ' (difference)',
+                    'amount': round(amount, 2),
+                    'vat_amount': vat_amount,
+                    'total': round(float(amount) + vat_amount, 2)
+                })
+                total_amount += float(amount) + float(vat_amount)
+    return total_amount
+    

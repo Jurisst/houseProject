@@ -26,6 +26,7 @@
                 <tr>
                     <th>Service</th>
                     <th>Period</th>
+                    <th>Quantity</th>
                     <th>Amount</th>
                     <th>Actions</th>
                 </tr>
@@ -35,6 +36,7 @@
                     <tr>
                         <td>{{ bill.service }}</td>
                         <td>{{ bill.period }}</td>
+                        <td>{{ bill.quantity_received|floatformat:3 }}</td>
                         <td>€{{ bill.amount|floatformat:2 }}</td>
                         <td>
                             <a href="{% url 'incoming_bill_update' house.id bill.pk %}" class="btn btn-sm btn-primary">Edit</a>

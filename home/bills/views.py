@@ -41,6 +41,9 @@ from .calculations import (
     calculate_bills_for_person_count,
     calculate_volume_services,
     calculate_area_services,
+    calculate_house_total_consumption,
+    calculate_meters_total_consumption,
+    calculate_water_difference,
     SERVICE_TO_METER_TYPE
 )
 
@@ -794,7 +797,10 @@ def add_meter_reading(request, meter_id, house_id=None, apartment_id=None):
                 try:
                     reading = form.save()
                     messages.success(request, _('Reading added successfully.'), extra_tags='meter_reading')
-                    return redirect('meter_readings', meter_id=meter.id)
+                    if house and apartment:
+                        return redirect('meters_by_apartment', apartment_id=apartment.id, house_id=house.id)
+                    elif house and not apartment:
+                        return redirect('meters_by_house', house_id=house.id)
                 except ValidationError as e:
                     for field, error in e.message_dict.items():
                         form.add_error(field, error)
@@ -821,52 +827,61 @@ def calculate_consumption(request, house_id):
         selected_month = datetime.now().month
         selected_year = datetime.now().year
     
-    last_day = calendar.monthrange(selected_year, selected_month)[1]
+    # Get all readings up to the end of the selected month
+    end_date = datetime(selected_year, selected_month, calendar.monthrange(selected_year, selected_month)[1])
     
-    start_date = datetime(selected_year, selected_month, 1)
-    end_date = datetime(selected_year, selected_month, last_day)
+    # Calculate previous month
+    if selected_month == 1:
+        prev_month = 12
+        prev_year = selected_year - 1
+    else:
+        prev_month = selected_month - 1
+        prev_year = selected_year
     
-    consumption_data = MeterReading.objects.filter(
+    # Get current month readings
+    current_readings = MeterReading.objects.filter(
         meter__apartment_number__address=house,
-        reading_date__lte=end_date
-    ).annotate(
-        prev_reading=Window(
-            expression=Lag('reading_value'),
-            partition_by=F('meter'),
-            order_by=F('reading_date').asc()
-        ),
-        prev_date=Window(
-            expression=Lag('reading_date'),
-            partition_by=F('meter'),
-            order_by=F('reading_date').asc()
-        )
-    ).filter(
-        reading_date__range=(start_date, end_date)
-    ).select_related(
-        'meter',
-        'meter__apartment_number'
-    )
-
+        reading_date__year=selected_year,
+        reading_date__month=selected_month
+    ).select_related('meter', 'meter__apartment_number')
+    
+    # Get previous month readings
+    prev_readings = MeterReading.objects.filter(
+        meter__apartment_number__address=house,
+        reading_date__year=prev_year,
+        reading_date__month=prev_month
+    ).select_related('meter', 'meter__apartment_number')
+    
+    # Create a dictionary of previous readings for quick lookup
+    prev_readings_dict = {
+        reading.meter_id: reading.reading_value 
+        for reading in prev_readings
+    }
+    
+    # Calculate consumption for each reading
     readings_with_consumption = []
-    for reading in consumption_data:
-        if reading.prev_reading is not None:
-            consumption = reading.reading_value - reading.prev_reading
-            readings_with_consumption.append({
-                'meter': reading.meter,
-                'apartment': reading.meter.apartment_number,
-                'previous_date': reading.prev_date,
-                'previous_value': reading.prev_reading,
-                'current_date': reading.reading_date,
-                'current_value': reading.reading_value,
-                'consumption': consumption
-            })
-
-    # Change this part to use a fixed range or get the earliest year from meter readings
+    monthly_consumption = 0
+    for reading in current_readings:
+        # Try to get previous month's reading, if not available use meter's default reading
+        prev_reading = prev_readings_dict.get(reading.meter_id, reading.meter.reading_default)
+        
+        consumption = reading.reading_value - prev_reading
+        monthly_consumption += consumption
+        readings_with_consumption.append({
+            'meter': reading.meter,
+            'apartment': reading.meter.apartment_number,
+            'previous_date': datetime(prev_year, prev_month, 1),
+            'previous_value': prev_reading,
+            'current_date': reading.reading_date,
+            'current_value': reading.reading_value,
+            'consumption': consumption,
+        })
+    
+    # Get available years from meter readings
     current_year = datetime.now().year
     earliest_reading = MeterReading.objects.filter(
         meter__apartment_number__address=house
     ).order_by('reading_date').first()
-    
     start_year = earliest_reading.reading_date.year if earliest_reading else current_year
     
     context = {
@@ -876,10 +891,10 @@ def calculate_consumption(request, house_id):
         'selected_year': selected_year,
         'available_years': range(start_year, current_year + 1),
         'months': range(1, 13),
+        'monthly_consumption': monthly_consumption
     }
     
     return render(request, 'bills/consumption_calculation.html', context)
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -971,12 +986,20 @@ def calculate_total_bills(request, house_id):
 
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
-    
+    house_total_consumption = []
+    meters_total_consumption = []
+
+    if volume_bills:
+        house_total_consumption = calculate_house_total_consumption(volume_bills, house_total_consumption)
+        print(f"House total consumption: {house_total_consumption}")
+        meters_total_consumption = calculate_meters_total_consumption(volume_bills, meters_total_consumption, selected_year, selected_month)
+        print(f"Meters total consumption: {meters_total_consumption}")
     for apartment in apartments:
         public_positions = []
         individual_positions = []
-        total_amount = 0
         monthly_consumption = 0
+        
+        total_amount = 0
         if object_count_bills:
             total_amount = calculate_object_count_bills(house, object_count_bills, public_positions, apartments, Service, total_amount)
         if living_person_bills: 
@@ -997,15 +1020,20 @@ def calculate_total_bills(request, house_id):
                 total_amount,
                 monthly_consumption
             )
+        # total_consumption += monthly_consumption
         print(f"Total amount: {total_amount}")
         print(f"Monthly consumption: {monthly_consumption}")            
-
+        print(f"Total house consumption: {house_total_consumption}")
+        print(f"Total meters consumption: {meters_total_consumption}")
         apartment_bills[apartment] = {
             'public_positions': public_positions,
             'individual_positions': individual_positions,
-            'total': round(total_amount, 2)
+            'total': round(total_amount, 2),
+            'total_consumption': house_total_consumption,
+            'meters_consumption': meters_total_consumption        
         }
-
+    # for apartment in apartment_bills:
+    #     apartment_bills[apartment]['water_difference'] = calculate_water_difference(volume_bills, individual_positions, house_total_consumption, total_amount, Service)
     # Get available years from incoming bills
     available_years = list(IncomingBill.objects.filter(
         house=house
