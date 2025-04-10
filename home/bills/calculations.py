@@ -42,13 +42,22 @@ def calculate_object_count_bills(house, bills, public_positions, apartments, Ser
 
 def calculate_bills_for_person_count(house, bills, public_positions, apartment, Service, total_amount): 
     for bill in bills:
+        bill_type = bill.service.service_type
+        print(f"Bill type: {bill_type}")
+        
         # pay for person count
-        if bill.service.service_type == 'living_person_count':
+        if bill_type == 'volume' and bill.service.water_difference_calculation == 'living_person_count':
+            bill_type = 'living_person_count'
+        if bill_type == 'volume' and bill.service.water_difference_calculation == 'declared_person_count':
+            bill_type = 'declared_person_count'
+        if bill_type == 'living_person_count':
             pay_for_unit = bill.amount / house.living_person_count
             amount = pay_for_unit * apartment.living_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
+                'area': apartment.area, 
                 'living_person_count': apartment.living_person_count,
+                'declared_person_count': apartment.declared_person_count,
                 'quantity': round(bill.quantity_received / house.living_person_count * apartment.living_person_count, 2),                
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
                 'service_type': bill.service.service_type,
@@ -59,11 +68,13 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-        if bill.service.service_type == 'declared_person_count':
+        if bill_type == 'declared_person_count':
             pay_for_unit = bill.amount / house.declared_person_count
             amount = pay_for_unit * apartment.declared_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
+                'area': apartment.area, 
+                'living_person_count': apartment.living_person_count,
                 'declared_person_count': apartment.declared_person_count,
                 'quantity': round(bill.quantity_received / house.declared_person_count * apartment.declared_person_count, 2),
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
@@ -164,61 +175,62 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                 
     return total_amount, monthly_consumption
 
-def calculate_house_total_consumption(volume_bills, house_total_consumption):
-    for bill in volume_bills:
-        house_total_consumption.append((bill.service.name, bill.quantity_received))
-    return house_total_consumption
 
-def calculate_meters_total_consumption(volume_bills, meters_total_consumption, selected_year, selected_month):
-    for bill in volume_bills:
-        meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
-        if meter_type:
-            meters = Meter.objects.filter(
-                type=meter_type
-            )   
-            for meter in meters:
-                default_reading = meter.reading_default
-                # Get current month reading
-                current_reading = MeterReading.objects.filter(
-                    meter=meter,
-                    reading_date__year=selected_year,
-                    reading_date__month=selected_month
-                ).first()
-                
-                # Get previous month reading
-                if selected_month == 1:
-                    prev_month = 12
-                    prev_year = selected_year - 1
-                else:
-                    prev_month = selected_month - 1
-                    prev_year = selected_year
-                    
-                prev_reading = MeterReading.objects.filter(
-                    meter=meter,
-                    reading_date__year=prev_year,
-                    reading_date__month=prev_month
-                ).first()
-                
-                if current_reading and prev_reading:
-                    consumption = current_reading.reading_value - prev_reading.reading_value
-                elif current_reading and not prev_reading:
-                    # assume that the previous reading is missing and the current reading is the first reading
-                    consumption = current_reading.reading_value - default_reading
-                else:
-                    consumption = 0
-                    print(f"No consumption for {meter.apartment_number.apartment_nr} {meter.type} meter")
+def calculate_water_difference(bills, apartment, selected_year, selected_month, individual_positions, total_consumption, total_amount, Service):    
+# Used in calculate_total_bills/calculate_volume_services. 
+# Calculates the difference between the total consumption and the quantity received.
+# Splits the difference between the apartments without meters.
 
-                meters_total_consumption.append((meter_type, consumption))
-            
-    return meters_total_consumption
-
-def calculate_water_difference(bills, individual_positions, total_consumption, total_amount, Service):
     for bill in bills:
-        print(f"Bill: {bill.service.service_type}")
         house = bill.house
         if bill.service.name == 'cold_water':
             if bill.quantity_received > total_consumption:
-                difference = (bill.quantity_received - total_consumption) / house.apartment_count
+                if bill.service.water_difference_calculation == 'object_count': # MK 524.10.1
+                    difference = (bill.quantity_received - total_consumption) / house.apartment_count
+                elif bill.service.water_difference_calculation == 'last_month_consumption': # MK 524.10.2
+                    # Get last month's consumption for this apartment
+                    if selected_month == 1:
+                        last_month = 12
+                        last_year = selected_year - 1
+                    else:
+                        last_month = selected_month - 1
+                        last_year = selected_year
+                    
+                    # Get all meters for this apartment
+                    apartment_meters = Meter.objects.filter(
+                        apartment_number=apartment,
+                        type__in=['cold', 'hot']
+                    )
+                    
+                    # Calculate total consumption for last month
+                    last_month_consumption = 0
+                    for meter in apartment_meters:
+                        last_reading = MeterReading.objects.filter(
+                            meter=meter,
+                            reading_date__year=last_year,
+                            reading_date__month=last_month
+                        ).first()
+                        
+                        if last_reading:
+                            # Get the reading before last month
+                            if last_month == 1:
+                                prev_month = 12
+                                prev_year = last_year - 1
+                            else:
+                                prev_month = last_month - 1
+                                prev_year = last_year
+                                
+                            prev_reading = MeterReading.objects.filter(
+                                meter=meter,
+                                reading_date__year=prev_year,
+                                reading_date__month=prev_month
+                            ).first()
+                            
+                            if prev_reading:
+                                last_month_consumption += last_reading.reading_value - prev_reading.reading_value
+                    
+                    # Calculate difference based on last month's consumption
+                    difference = last_month_consumption
                 amount = difference * bill.service.price_per_unit
                 vat_amount = calculate_vat(bill, amount)
                 individual_positions.append({

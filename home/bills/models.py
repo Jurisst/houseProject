@@ -37,6 +37,13 @@ class Provider(models.Model):
         return self.name + ' ' + self.business_form
 
 class House(models.Model):
+    CALCULATION_CHOICES = [
+        ('volume', 'Volume'),
+        ('object_count', 'Object count'),
+        ('part_of_house', 'Part of house'),
+        ('living_person_count', 'Living person count'),
+        ('declared_person_count', 'Declared person count'),
+    ]
     address = models.CharField(max_length=50, validators=[
         MinLengthValidator(6, 'Must be at least 6 characters'),
         MaxLengthValidator(50, 'Max length is 50 characters')
@@ -47,6 +54,10 @@ class House(models.Model):
     living_person_count = models.IntegerField("Count of living persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     declared_person_count = models.IntegerField("Count of declared persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     area_total = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
+    # water_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
+    # # water_difference_calculation = models.CharField(max_length=30, choices=CALCULATION_CHOICES)
+    # waste_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
+
 
     def update_apartment_count(self):
         self.apartment_count = Apartment.objects.filter(address=self).count()
@@ -80,17 +91,28 @@ class Service(models.Model):
         ('living_person_count', 'Count of living persons (524.4.3)'),
         ('declared_person_count', 'Count of declared persons (524.4.4)'),
         ('area', 'Area (524.17.1)'),
+        ('heated_area', 'Heated area'),
         ('volume', 'Volume (524.17.2)'),
+        ('one_time_payment', 'One time payment'),
     ]
     service_type = models.CharField(max_length=30, choices=CHOICES)
+
+    CHOICES_WATER_DIFFERENCE_CALCULATION = [
+        ('object_count', 'Object count'),        
+        ('last_month_consumption', 'Last month consumption'),
+        ('last_3_months_consumption', 'Last 3 months consumption'),
+        ('part_of_house', 'Part of house'),
+        ('living_person_count', 'Living person count'),
+        ('declared_person_count', 'Declared person count'),
+        ('room_wo_person', 'Room without person'),
+        ]
+    water_difference_calculation = models.CharField(max_length=30, choices=CHOICES_WATER_DIFFERENCE_CALCULATION)
     # measuring units
     measuring_units = models.CharField(max_length=4, validators=[
         MinLengthValidator(1, 'Must be at least 1 character')
     ])
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
-    # presence of meters of the service (boolean, True/False)
-    CHOICES_BOOL = [(True, 'With Meters'), (False, 'No Meters')]
-    meters_of_volume = models.BooleanField(choices=CHOICES_BOOL, default=True)
+
 
     def __str__(self):
         return self.get_name_display() + '  ' + self.get_service_type_display() 
@@ -111,10 +133,13 @@ class Apartment(models.Model):
     address = models.ForeignKey(House, on_delete=models.CASCADE)
     apartment_nr = models.IntegerField(validators=[MinValueValidator(1, 'Must be at least 1')])
     area = models.IntegerField("Area of apartment", validators=[MinValueValidator(1, 'Must be at least 1')])
-    heated_area = models.IntegerField("Heated area of apartment", validators=[MinValueValidator(1, 'Must be at least 1')])
+    mean_house_part = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0, 'Must be at least 0')])
+    heated_area = models.IntegerField("Heated area of apartment", validators=[MinValueValidator(0, 'Must be at least 0')])
     cold_meters_count = models.IntegerField("Count of cold water meters", validators=[MinValueValidator(0, 'Can not be negative number')])
     hot_meters_count = models.IntegerField("Count of hot water meters", validators=[MinValueValidator(0, 'Can not be negative number')])
     heat_meters_count = models.IntegerField("Count of heat meters", validators=[MinValueValidator(0, 'Can not be negative number')])
+    electricity_meters_count = models.IntegerField("Count of electricity meters", validators=[MinValueValidator(0, 'Can not be negative number')])
+    gas_meters_count = models.IntegerField("Count of gas meters", validators=[MinValueValidator(0, 'Can not be negative number')])
     living_person_count = models.IntegerField("Count of living persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     declared_person_count = models.IntegerField("Count of declared persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, default='')

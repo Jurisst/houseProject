@@ -41,8 +41,6 @@ from .calculations import (
     calculate_bills_for_person_count,
     calculate_volume_services,
     calculate_area_services,
-    calculate_house_total_consumption,
-    calculate_meters_total_consumption,
     calculate_water_difference,
     SERVICE_TO_METER_TYPE
 )
@@ -961,6 +959,7 @@ def houses_providers(request, house_id):
 def calculate_total_bills(request, house_id):
     house = get_object_or_404(House, id=house_id)
     apartments = Apartment.objects.filter(address=house)
+    meters = Meter.objects.filter(apartment_number__address=house)
     
     # Get the selected year and month from request parameters or use current date
     try:
@@ -1027,19 +1026,24 @@ def calculate_total_bills(request, house_id):
     for apartment in apartments:
         public_positions = []
         individual_positions = []
-        monthly_consumption = 0
-        
+        monthly_consumption = 0        
         total_amount = 0
+
+        # Calculate object count services (every apartment pays for the same amount)
         if object_count_bills:
             total_amount = calculate_object_count_bills(house, object_count_bills, public_positions, apartments, Service, total_amount)
+
+        # Calculate living person count services  (for currently residing (living or declared) persons)
         if living_person_bills: 
             total_amount = calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
         if declared_person_bills:
             total_amount = calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
+        
+        # Calculate area services (for total area or heated area of the apartment)
         if area_bills:
             total_amount = calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount)
         
-        # Calculate volume services
+        # Calculate volume (metered) services (for water, heat, etc.)
         if volume_bills:
             total_amount, monthly_consumption = calculate_volume_services(
                 volume_bills,
@@ -1051,6 +1055,14 @@ def calculate_total_bills(request, house_id):
                 total_amount,
                 monthly_consumption
             )
+            
+            # Check if the apartment has a water meter
+            # if not apartment.apartment_nr in meters.values_list('apartment_number__apartment_nr', flat=True):
+
+            #     # calculate from living person count
+            #     total_amount = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
+            #     # Calculate water difference (for water meters)
+            #     # total_amount = calculate_water_difference(volume_bills, apart ment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service)
 
         apartment_bills[apartment] = {
             'public_positions': public_positions,

@@ -26,11 +26,11 @@
                     <tbody>
                         <tr>
                             <th class="table-light">Name:</th>
-                            <td>{{ service.name }}</td>
+                            <td>{{ service.get_name_display }}</td>
                         </tr>
                         <tr>
                             <th class="table-light">Service Type:</th>
-                            <td>{{ service.service_type }}</td>
+                            <td>{{ service.get_service_type_display }}</td>
                         </tr>
                         <tr>
                             <th class="table-light">Measuring Units:</th>
@@ -43,6 +43,10 @@
                         <tr>
                             <th class="table-light">House:</th>
                             <td>{{ service.house.address }}</td>
+                        </tr>
+                        <tr>
+                            <th class="table-light">Water difference calculation:</th>
+                            <td>{{ service.get_water_difference_calculation_display }}</td>
                         </tr>
                     </tbody>
                 </table>

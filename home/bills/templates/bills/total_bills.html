@@ -82,7 +82,7 @@
                                                     <td>{{ position.service }}</td>
                                                     <td>{{ position.quantity }} {{ position.measuring_units }}</td>
                                                     <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
-                                                    <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }}</td>
+                                                    <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }} persons</td>
                                                     <td>{{ position.amount|floatformat:2 }} €</td>
                                                     <td>{{ position.vat_amount|floatformat:2 }} €</td>
                                                     <td>{{ position.total|floatformat:2 }} €</td>
