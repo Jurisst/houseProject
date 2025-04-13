@@ -30,6 +30,18 @@ class ServiceForm2(forms.ModelForm):
         else:
             self.fields['house'].label_from_instance = lambda obj: obj.address
 
+        if self.instance.get_name_display() != 'Cold water' and self.instance.get_name_display() != 'Hot water':
+            self.fields['water_difference_calculation'].widget = forms.HiddenInput()
+        else:
+            self.fields['water_difference_calculation'].widget = forms.Select(choices=Service.CHOICES_WATER_DIFFERENCE_CALCULATION)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.instance.get_name_display() == 'Cold water' or self.instance.get_name_display() == 'Hot water':
+            if not cleaned_data.get('water_difference_calculation'):
+                raise forms.ValidationError("Please select water difference calculation method")
+        return cleaned_data
+
 
 class HouseForm(forms.ModelForm):
     # apartment_count = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'readonly': 'readonly'}))

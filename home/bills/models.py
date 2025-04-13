@@ -80,7 +80,7 @@ class House(models.Model):
 
 class Service(models.Model):
     house = models.ForeignKey(House, on_delete=models.CASCADE, default=None)
-    NAME_CHOICES = [('cold_water', 'Cold water'), ('electricity', 'Electricity'), ('hot_water', 'Hot water'), ('heat', 'Heat'), ('other', 'Other')]
+    NAME_CHOICES = [(None, 'Select service'), ('cold_water', 'Cold water'), ('electricity', 'Electricity'), ('hot_water', 'Hot water'), ('heat', 'Heat'), ('other', 'Other')]
     # name of the service
     name = models.CharField(max_length=30, choices=NAME_CHOICES, validators=[MinLengthValidator(3, 'Must be at least 3 characters')])
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=None)
@@ -98,6 +98,7 @@ class Service(models.Model):
     service_type = models.CharField(max_length=30, choices=CHOICES)
 
     CHOICES_WATER_DIFFERENCE_CALCULATION = [
+        (None, 'Select water difference calculation method'),
         ('object_count', 'Object count'),        
         ('last_month_consumption', 'Last month consumption'),
         ('last_3_months_consumption', 'Last 3 months consumption'),
@@ -106,7 +107,13 @@ class Service(models.Model):
         ('declared_person_count', 'Declared person count'),
         ('room_wo_person', 'Room without person'),
         ]
-    water_difference_calculation = models.CharField(max_length=30, choices=CHOICES_WATER_DIFFERENCE_CALCULATION)
+    water_difference_calculation = models.CharField(
+        max_length=30, 
+        choices=CHOICES_WATER_DIFFERENCE_CALCULATION,
+        null=True,
+        blank=True,
+        default=None
+    )
     # measuring units
     measuring_units = models.CharField(max_length=4, validators=[
         MinLengthValidator(1, 'Must be at least 1 character')
@@ -115,7 +122,8 @@ class Service(models.Model):
 
 
     def __str__(self):
-        return self.get_name_display() + '  ' + self.get_service_type_display() 
+        return self.get_name_display() + '  ' + self.get_service_type_display()
+
 
 
 class Consumer(models.Model):

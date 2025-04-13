@@ -41,7 +41,6 @@ from .calculations import (
     calculate_bills_for_person_count,
     calculate_volume_services,
     calculate_area_services,
-    calculate_water_difference,
     SERVICE_TO_METER_TYPE
 )
 
@@ -105,7 +104,7 @@ def success_add_provider(request, provider_id):
     return render(request, 'bills/sp_provider_add.html', {'provider': provider})
 
 
-def success_add_service(request, service_id, house_id=None):
+def success_add_service(request, house_id, service_id):
     service = get_object_or_404(Service, id=service_id)
     context = {'service': service}
 
@@ -447,7 +446,10 @@ def add_service_to_house(request, house_id, text=None):
                 service = form.save(commit=False)
                 service.house = house
                 service.save()
-                return redirect('success_service', house_id=house.id, service_id=service.id)  # Redirect to a success page
+                if service.get_name_display() == 'Cold water' or service.get_name_display() == 'Hot water':
+                    return redirect('service_update', house_id=house.id, pk=service.id)  # Redirect to a success page
+                else:
+                    return redirect('success_service', house_id=house.id, service_id=service.id)  # Redirect to a success page
     else:
         form = ServiceForm2(initial={'house': house})
     if text:

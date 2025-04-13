@@ -47,3 +47,5 @@ def invalid_meters_count(form, meters, apartment):
             return text
         else:
             pass
+
+

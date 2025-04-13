@@ -64,7 +64,7 @@ urlpatterns = [
     
     # Success pages
     path('success_provider/<int:provider_id>/', views.success_add_provider, name='success_provider'),
-    path('success_service/<int:service_id>/', views.success_add_service, name='success_service'),
+    path('success_service/<int:house_id>/<int:service_id>/', views.success_add_service, name='success_service'),
     path('success_service/<int:house_id>/<int:service_id>/', views.success_add_service, name='success_service_with_house'),
     path('success_house/<int:house_id>/', views.success_add_house, name='success_house'),
     path('success_consumer/<int:consumer_id>/', views.success_add_consumer, name='success_consumer'),
