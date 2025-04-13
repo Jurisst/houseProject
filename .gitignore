@@ -1,0 +1,8 @@
+home/db.sqlite3
+home/db.sqlite3-journal
+home/bills/migrations
+home/__pycache__
+home/bills/__pycache__
+home/home/__pycache__
+
+*.pyc
