@@ -54,8 +54,9 @@ class House(models.Model):
     living_person_count = models.IntegerField("Count of living persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     declared_person_count = models.IntegerField("Count of declared persons", validators=[MinValueValidator(0, 'Can not be negative number')])
     area_total = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
-    # water_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
-    # # water_difference_calculation = models.CharField(max_length=30, choices=CALCULATION_CHOICES)
+    water_calculation_type_1 = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
+    water_calculation_type_2 = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
+    water_difference_calculation = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='object_count')
     # waste_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
 
 

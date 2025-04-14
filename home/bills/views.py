@@ -1063,6 +1063,7 @@ def calculate_total_bills(request, house_id):
             
             # Check if the apartment has a water meter
             # if not apartment.apartment_nr in meters.values_list('apartment_number__apartment_nr', flat=True):
+            #     if house.water_calculation_type_1 == 'volume':
 
             #     # calculate from living person count
             #     total_amount = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
