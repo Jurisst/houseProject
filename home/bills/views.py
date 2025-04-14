@@ -11,7 +11,7 @@ from .models import Provider, Service, House, Consumer, Apartment, Meter, Incomi
 from .help_functions import manage_db_table
 from django.http import JsonResponse
 from datetime import datetime
-from .validations import invalid_meters_count
+from .validations import invalid_meters_count, is_not_unique_incoming_bill
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Window, Sum
@@ -412,7 +412,6 @@ def add_service(request, text=None):
         form = ServiceForm(request.POST)
         if form.is_valid():
             name_n_type = int(form['house'].value()), form['name'].value(), form['service_type'].value()
-            print(name_n_type)
             if name_n_type in services_list:
                 text = f'Service name {form['name'].value().upper()} with type {form['service_type'].value().upper()} is already registered for this house'
             else:
@@ -747,17 +746,21 @@ def add_incoming_bill(request, house_id=None):
         house = get_object_or_404(House, id=house_id)
     else:
         house = None
+    existing_bills = IncomingBill.objects.filter(house=house)
+    err = None
         
     if request.method == 'POST':
         form = IncomingBillForm2(request.POST, house=house)
         if form.is_valid():
-            incoming_bill = form.save()  
-            messages.success(request, 'Bill successfully created.', extra_tags='bill')
-            return redirect('success_incoming', house.id, incoming_bill.id)
+            err = is_not_unique_incoming_bill(form, existing_bills)
+            if not err:
+                incoming_bill = form.save()  
+                messages.success(request, 'Bill successfully created.', extra_tags='bill')
+                return redirect('success_incoming', house.id, incoming_bill.id)
     else:
         form = IncomingBillForm2(house=house)
     
-    return render(request, 'bills/incoming_bill_form.html', {'house': house, 'form': form})
+    return render(request, 'bills/incoming_bill_form.html', {'house': house, 'form': form, 'err': err})
 
 
 @login_required

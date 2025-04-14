@@ -208,6 +208,7 @@ class IncomingBill(models.Model):
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
     house = models.ForeignKey(House, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    number = models.CharField(max_length=20, validators=[MinLengthValidator(2, 'Must be at least 2 characters')])
     year = models.PositiveIntegerField(help_text="Format: YYYY",
                                        validators=[RegexValidator(r'^(202[1-9]|20[3-9])$')])
     month = models.PositiveSmallIntegerField(help_text="Format: MM",
@@ -226,7 +227,7 @@ class IncomingBill(models.Model):
         return f"{self.year}-{str(self.month).zfill(2)}"
 
     def __str__(self):
-        return str(self.house) + '  ' + str(self.service) + ' ' + str(self.year) + ' ' + str(self.month)
+        return str(self.provider) + '  ' + str(self.number) + '  ' + str(self.house) + '  ' + str(self.service) + ' ' + str(self.year) + ' ' + str(self.month)
 
     
 

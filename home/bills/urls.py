@@ -60,7 +60,6 @@ urlpatterns = [
     path("houses/<int:house_id>/total-bills/", views.calculate_total_bills, name='total_bills'),
     path("houses/<int:house_id>/total-bills/<int:year>/<int:month>/", views.calculate_total_bills, name='total_bills_with_date'),
     path("houses/<int:house_id>/apartments/<int:apartment_id>/bill/<int:year>/<int:month>/pdf/", views.generate_apartment_bill_pdf, name='generate_apartment_bill_pdf'),
-    path('houses/<int:house_id>/calculate-public-bills/', views.calculate_public_bills, name='calculate_public_bills'),
     
     # Success pages
     path('success_provider/<int:provider_id>/', views.success_add_provider, name='success_provider'),

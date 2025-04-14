@@ -48,4 +48,14 @@ def invalid_meters_count(form, meters, apartment):
         else:
             pass
 
-
+def is_not_unique_incoming_bill(form, existing_bills):
+    provider = form.cleaned_data['provider']
+    number = form.cleaned_data['number']
+    house = form.cleaned_data['house']
+    service = form.cleaned_data['service']
+    year = form.cleaned_data['year']
+    month = form.cleaned_data['month']
+    if existing_bills.filter(provider=provider, number=number, house=house, service=service, year=year, month=month).exists():
+        return 'Incoming bill for this period and service is already registered. Please check the data.'
+    else:
+        return None

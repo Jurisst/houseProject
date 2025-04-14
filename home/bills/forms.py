@@ -146,7 +146,7 @@ class MeterForm2(forms.ModelForm):
 class IncomingBillForm(forms.ModelForm):
     class Meta:
         model = IncomingBill
-        fields = ['provider', 'house', 'service', 'year', 'month', 'quantity_received', 'amount']
+        fields = ['provider', 'number', 'house', 'service', 'year', 'month', 'quantity_received', 'amount']
         widgets = {
             'year': forms.NumberInput(attrs={'placeholder': 'e.g. 2025'}),
             'month': forms.NumberInput(attrs={'placeholder': '01-12'}),
@@ -157,7 +157,7 @@ class IncomingBillForm(forms.ModelForm):
 class IncomingBillForm2(forms.ModelForm):
     class Meta:
         model = IncomingBill
-        fields = ['provider', 'service', 'year', 'month', 'amount', 'quantity_received', 'house']
+        fields = ['provider', 'number', 'house', 'service', 'year', 'month', 'amount', 'quantity_received']
         widgets = {
             'year': forms.NumberInput(attrs={'placeholder': 'e.g. 2025'}),
             'month': forms.NumberInput(attrs={'placeholder': '01-12'}),
