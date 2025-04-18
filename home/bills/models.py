@@ -44,6 +44,20 @@ class House(models.Model):
         ('living_person_count', 'Living person count'),
         ('declared_person_count', 'Declared person count'),
     ]
+
+
+    CHOICES_WATER_DIFFERENCE_CALCULATION = [
+        (None, 'Select water difference calculation method'),
+        ('object_count', 'Object count'),        
+        ('last_month_consumption', 'Last month consumption'),
+        ('last_3_months_consumption', 'Last 3 months consumption'),
+        ('part_of_house', 'Part of house'),
+        ('living_person_count', 'Living person count'),
+        ('declared_person_count', 'Declared person count'),
+        ('room_wo_person', 'Room without person'),
+        ]
+    
+
     address = models.CharField(max_length=50, validators=[
         MinLengthValidator(6, 'Must be at least 6 characters'),
         MaxLengthValidator(50, 'Max length is 50 characters')
@@ -56,8 +70,10 @@ class House(models.Model):
     area_total = models.IntegerField(validators=[MinValueValidator(0, 'Can not be negative number')])
     water_calculation_type_1 = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
     water_calculation_type_2 = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
-    water_difference_calculation = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='object_count')
-    # waste_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='volume')
+    water_difference_calculation = models.CharField(max_length=30, choices=CHOICES_WATER_DIFFERENCE_CALCULATION, default='object_count')
+    waste_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
+    waste_water_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
+    pay_for_person = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
     def update_apartment_count(self):
@@ -96,25 +112,10 @@ class Service(models.Model):
         ('volume', 'Volume (524.17.2)'),
         ('one_time_payment', 'One time payment'),
     ]
-    service_type = models.CharField(max_length=30, choices=CHOICES)
+    service_type = models.CharField(max_length=30, choices=CHOICES) 
+    
+    
 
-    CHOICES_WATER_DIFFERENCE_CALCULATION = [
-        (None, 'Select water difference calculation method'),
-        ('object_count', 'Object count'),        
-        ('last_month_consumption', 'Last month consumption'),
-        ('last_3_months_consumption', 'Last 3 months consumption'),
-        ('part_of_house', 'Part of house'),
-        ('living_person_count', 'Living person count'),
-        ('declared_person_count', 'Declared person count'),
-        ('room_wo_person', 'Room without person'),
-        ]
-    water_difference_calculation = models.CharField(
-        max_length=30, 
-        choices=CHOICES_WATER_DIFFERENCE_CALCULATION,
-        null=True,
-        blank=True,
-        default=None
-    )
     # measuring units
     measuring_units = models.CharField(max_length=4, validators=[
         MinLengthValidator(1, 'Must be at least 1 character')

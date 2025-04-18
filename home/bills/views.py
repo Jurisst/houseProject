@@ -40,6 +40,7 @@ from .calculations import (
     calculate_object_count_bills, 
     calculate_bills_for_person_count,
     calculate_volume_services,
+    calculate_water_difference,
     calculate_area_services,
     SERVICE_TO_METER_TYPE
 )
@@ -1061,9 +1062,15 @@ def calculate_total_bills(request, house_id):
                 monthly_consumption
             )
             
+            if house.water_calculation_type_1 == 'volume':
             # Check if the apartment has a water meter
-            # if not apartment.apartment_nr in meters.values_list('apartment_number__apartment_nr', flat=True):
-            #     if house.water_calculation_type_1 == 'volume':
+                if not apartment.apartment_nr in meters.values_list('apartment_number__apartment_nr', flat=True):
+                    if house.water_calculation_type_2 == 'living_person_count' or house.water_calculation_type_2 == 'declared_person_count':
+                        total_amount = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
+                        total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service)
+                    elif house.water_calculation_type_2 == 'object_count':
+                        total_amount = calculate_object_count_bills(house, volume_bills, public_positions, apartment, Service, total_amount)
+                    
 
             #     # calculate from living person count
             #     total_amount = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
