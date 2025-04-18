@@ -68,8 +68,12 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>{% translate "Service" %}</th>
-                                                <th>{% translate "Quantity" %}</th>
-                                                <th>{% translate "Pay for unit" %}</th>
+                                                {% if house.water_calculation_type_1 == 'volume' %}
+                                                    <th>{% translate "Quantity" %}</th>
+                                                {% endif %}
+                                                {% if house.water_calculation_type_2 == 'object_count' %}
+                                                    <th>{% translate "Pay for unit" %}</th>
+                                                {% endif %}
                                                 <th>{% translate "Calculation" %}</th>
                                                 <th>{% translate "Amount" %}</th>
                                                 <th>{% translate "VAT" %}</th>
@@ -80,8 +84,12 @@
                                             {% for position in bill_data.public_positions %}
                                                 <tr>
                                                     <td>{{ position.service }}</td>
-                                                    <td>{{ position.quantity }} {{ position.measuring_units }}</td>
-                                                    <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
+                                                    {% if house.water_calculation_type_1 == 'volume' %}
+                                                        <td>{{ position.quantity}} {{ position.measuring_units }}</td>
+                                                    {% endif %}
+                                                    {% if house.water_calculation_type_2 == 'object_count' %}
+                                                        <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
+                                                    {% endif %}
                                                     <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }} persons</td>
                                                     <td>{{ position.amount|floatformat:2 }} €</td>
                                                     <td>{{ position.vat_amount|floatformat:2 }} €</td>

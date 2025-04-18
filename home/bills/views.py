@@ -351,7 +351,10 @@ class IncomingBillUpdateView(UpdateView):
     context_object_name = 'bill'
 
     def get_success_url(self):
-        return reverse_lazy('incoming_bill_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy('incoming_bill_detail', kwargs={
+            'house_id': self.object.house.id,
+            'pk': self.object.pk
+        })
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1070,6 +1073,7 @@ def calculate_total_bills(request, house_id):
                         total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service)
                     elif house.water_calculation_type_2 == 'object_count':
                         total_amount = calculate_object_count_bills(house, volume_bills, public_positions, apartment, Service, total_amount)
+                        total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service)
                     
 
             #     # calculate from living person count
@@ -1101,7 +1105,8 @@ def calculate_total_bills(request, house_id):
         'selected_year': selected_year,
         'available_years': available_years,
         'months': range(1, 13),
-        'house_water_consumption': house_water_consumption
+        'house_water_consumption': house_water_consumption,
+        'pay_for_person': house.pay_for_person
     }
     
     return render(request, 'bills/total_bills.html', context)

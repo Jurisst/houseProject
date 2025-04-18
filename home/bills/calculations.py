@@ -24,17 +24,23 @@ def calculate_vat(bill_data, total_amount):
 
 
 def calculate_object_count_bills(house, bills, public_positions, apartments, Service, total_amount):
+    # Handle both QuerySet and single Apartment object cases
+    apartments_count = apartments.count() if hasattr(apartments, 'count') else 1
+    
     for bill in bills:
-        amount = bill.amount / apartments.count()
+        amount = bill.amount / apartments_count
         vat_amount = calculate_vat(bill, amount)
         public_positions.append({
             'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
             'amount': round(amount, 2),
-            'quantity': round(bill.quantity_received / apartments.count(), 2),
+            'quantity': round(bill.quantity_received / apartments_count, 2),
             'price_per_unit': bill.service.price_per_unit,
             'measuring_units': bill.service.measuring_units,
             'vat_amount': vat_amount,
-            'total': round(float(amount) + vat_amount, 2)
+            'total': round(float(amount) + vat_amount, 2),
+            'living_person_count': 1,  # For object count bills, each apartment counts as 1
+            'declared_person_count': 1,  # For object count bills, each apartment counts as 1
+            'area': 1  # For object count bills, each apartment counts as 1
         })
         total_amount += float(amount) + float(vat_amount)
     return total_amount
@@ -47,10 +53,10 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
         # pay for person count
         if bill_type == 'volume' and house.water_calculation_type_2 == 'living_person_count':
             bill_type = 'living_person_count'
-            print(f"VOLUME TO LIVING PERSON COUNT")
+            # print(f"VOLUME TO LIVING PERSON COUNT")
         if bill_type == 'volume' and house.water_calculation_type_2 == 'declared_person_count':
             bill_type = 'declared_person_count'
-            print(f"VOLUME TO DECLARED PERSON COUNT")
+            # print(f"VOLUME TO DECLARED PERSON COUNT")
         if bill_type == 'living_person_count':
             amount = house.pay_for_person * apartment.living_person_count
             vat_amount = calculate_vat(bill, amount)
@@ -85,7 +91,7 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-        print(f"Amount: {amount}")
+        # print(f"Amount: {amount}")
         total_amount += float(amount) + float(vat_amount)
     return total_amount
 
@@ -234,8 +240,6 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                         else:
                             print(f"No last reading for {meter.apartment_number.apartment_nr} {meter.type} meter")
                     else:
-                        difference = (bill.quantity_received - total_consumption) / house.apartment_count
-                        print(f"Difference: {bill.quantity_received} - {total_consumption} / {house.apartment_count} = {difference}")
                         print(f"No meters for {apartment.apartment_nr}")
                             
                             
@@ -251,15 +255,15 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                         if previous_month_bill:
                             if last_month_consumption > 0:
                                 proportion = last_month_consumption / previous_month_bill.quantity_received
-                                print(f"Proportion: {proportion} l253")
+                                print(f"Proportion: {proportion} l254")
                             else:
                                 print(f"No last month consumption for {house.address} {bill.service.name}")
                                 difference = apartment.living_person_count * house.pay_for_person
-                                print(f"Difference: {difference} l257")
+                                print(f"Difference: {difference} l258")
                         else:
                             print(f"No previous month bill for {house.address} {bill.service.name}")
                             proportion = 0
-                            print(f"Proportion: {proportion} l256")
+                            print(f"Proportion: {proportion} l262")
                     elif house.water_difference_calculation == 'last_3_months_consumption': # MK 524.10.3
                         # Calculate consumption for previous 3 months
                         three_months_consumption = last_month_consumption
