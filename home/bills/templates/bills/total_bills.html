@@ -50,6 +50,45 @@
                 </div>
             </div>
 
+            {% if apartments_with_missing_readings %}
+                <div class="alert alert-warning mb-4">
+                    <h5>{% translate "Warning: Missing Meter Readings" %}</h5>
+                    <p>{% translate "The following apartments have missing meter readings for the selected period:" %}</p>
+                    <ul>
+                        {% for apartment, data in apartments_with_missing_readings.items %}
+                            <li>
+                                {% translate "Apartment" %} {{ apartment.apartment_nr }}:
+                                {% if data.missing_meters %}
+                                    {% translate "Missing readings for meters:" %} {{ data.missing_meters|join:", " }}
+                                {% endif %}
+                                {% if data.last_reading_date %}
+                                    {% translate "Last reading date:" %} {{ data.last_reading_date|date:"Y-m" }}
+                                {% endif %}
+                                {% if data.missing_readings_data %}
+                                    <div class="mt-2">
+                                        {% translate "Missing readings for:" %}
+                                        <ul class="list-unstyled ms-3">
+                                            {% for period, reading_data in data.missing_readings_data.items %}
+                                                <li>
+                                                    {% if period == 'current_month' %}
+                                                        {% translate "Current month" %} ({{ reading_data.year }}-{{ reading_data.month|stringformat:"02d" }})
+                                                    {% elif period == 'previous_month' %}
+                                                        {% translate "Previous month" %} ({{ reading_data.year }}-{{ reading_data.month|stringformat:"02d" }})
+                                                    {% elif period == 'two_months_ago' %}
+                                                        {% translate "Two months ago" %} ({{ reading_data.year }}-{{ reading_data.month|stringformat:"02d" }})
+                                                    {% endif %}
+                                                    - {{ reading_data.meter_type|title }} {% translate "meter" %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
             {% if apartment_bills %}
                 {% for apartment, bill_data in apartment_bills.items %}
                     <div class="card mb-4">
@@ -68,13 +107,15 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>{% translate "Service" %}</th>
-                                                {% if house.water_calculation_type_1 == 'volume' %}
+                                                {% if house.water_calculation_type_2 == 'volume' %}
                                                     <th>{% translate "Quantity" %}</th>
                                                 {% endif %}
                                                 {% if house.water_calculation_type_2 == 'object_count' %}
                                                     <th>{% translate "Pay for unit" %}</th>
                                                 {% endif %}
-                                                <th>{% translate "Calculation" %}</th>
+                                                {% if 'person_count' in house.water_calculation_type_2 %}
+                                                    <th>{% translate "Calculation" %}</th>
+                                                {% endif %}
                                                 <th>{% translate "Amount" %}</th>
                                                 <th>{% translate "VAT" %}</th>
                                                 <th>{% translate "Total" %}</th>
@@ -84,13 +125,18 @@
                                             {% for position in bill_data.public_positions %}
                                                 <tr>
                                                     <td>{{ position.service }}</td>
-                                                    {% if house.water_calculation_type_1 == 'volume' %}
+                                                    {% if house.water_calculation_type_2 == 'volume' %}
                                                         <td>{{ position.quantity}} {{ position.measuring_units }}</td>
                                                     {% endif %}
                                                     {% if house.water_calculation_type_2 == 'object_count' %}
                                                         <td>{{ position.pay_for_unit|floatformat:2 }} €</td>
                                                     {% endif %}
-                                                    <td>{{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }} persons</td>
+                                                    {% if 'person_count' in house.water_calculation_type_2 %}
+                                                        <td> 
+                                                            {{ house.norm_for_person }}{{ position.measuring_units }} x {{ position.price_per_unit }}€/{{ position.measuring_units }} x {{ position.living_person_count|default:position.declared_person_count|default:position.area|default:"-" }} persons
+                                                            <small class="text-muted d-block">({{ position.norm_for_person }}{{ position.measuring_units }} - pašvaldības not. norma 1 personai)</td>
+                                                        </td>
+                                                    {% endif %}
                                                     <td>{{ position.amount|floatformat:2 }} €</td>
                                                     <td>{{ position.vat_amount|floatformat:2 }} €</td>
                                                     <td>{{ position.total|floatformat:2 }} €</td>
@@ -161,7 +207,9 @@
                 {% endfor %}
 
                 <div class="text-end mt-3">
-                    <strong>{% translate "House water consumption" %}: {{ house_water_consumption }} m3 </strong>
+                    <strong>{% translate "House water consumption by meters" %}: {{ house_water_consumption }} m3 </strong>
+                    <strong>{% translate "Quantity received" %}: {{ quantity_received }} m3 </strong>
+                    <strong>{% translate "Difference" %}: {{ difference }} m3 </strong>
                 </div>
             {% else %}
                 <div class="alert alert-info">

@@ -73,7 +73,7 @@ class House(models.Model):
     water_difference_calculation = models.CharField(max_length=30, choices=CHOICES_WATER_DIFFERENCE_CALCULATION, default='object_count')
     waste_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
     waste_water_calculation_type = models.CharField(max_length=30, choices=CALCULATION_CHOICES, default='living_person_count')
-    pay_for_person = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    norm_for_person = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
     def update_apartment_count(self):
@@ -117,7 +117,7 @@ class Service(models.Model):
     
 
     # measuring units
-    measuring_units = models.CharField(max_length=4, validators=[
+    measuring_units = models.CharField(max_length=15, validators=[
         MinLengthValidator(1, 'Must be at least 1 character')
     ])
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
