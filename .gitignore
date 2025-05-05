@@ -1,4 +1,5 @@
-home/db.sqlite3
+db.sqlite3
+wsgi.py
 home/db.sqlite3-journal
 home/bills/migrations
 *.pyc
@@ -25,7 +26,6 @@ coverage.xml
 *.log
 .pytest_cache/
 .env
-db.sqlite3
 media/
 home/bills/__pycache__/forms.cpython-312.pyc
 home/bills/__pycache__/urls.cpython-312.pyc

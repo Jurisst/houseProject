@@ -49,8 +49,8 @@ from .calculations import (
 
 # Register DejaVu Sans font for Unicode support
 FONT_PATH = os.path.join(settings.BASE_DIR, 'static', 'fonts')
-pdfmetrics.registerFont(TTFont('DejaVuSans', os.path.join(FONT_PATH, 'DejaVuSans.TTF')))
-pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', os.path.join(FONT_PATH, 'DejaVuSans-Bold.TTF')))
+pdfmetrics.registerFont(TTFont('DejaVuSans', os.path.join(FONT_PATH, 'DejaVuSans.ttf')))
+pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', os.path.join(FONT_PATH, 'DejaVuSans-Bold.ttf')))
 
 # Register font family
 registerFontFamily('DejaVuSans',
@@ -112,7 +112,7 @@ def success_add_service(request, house_id, service_id):
 
     if house_id:
         house = get_object_or_404(House, id=house_id)
-        context['house'] = house
+        context["house"] = house
     return render(request, 'bills/sp_service_add.html', context)
     
 
@@ -162,7 +162,7 @@ class HouseDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['edit_url'] = reverse_lazy('house_update', kwargs={'pk': self.object.pk})
+        context["edit_url"] = reverse_lazy('house_update', kwargs={'pk': self.object.pk})
         return context
 
 
@@ -179,7 +179,7 @@ class ProviderDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['edit_url'] = reverse_lazy('provider_update', kwargs={'pk': self.object.pk})
+        context["edit_url"] = reverse_lazy('provider_update', kwargs={'pk': self.object.pk})
         return context
 
 
@@ -196,8 +196,8 @@ class ServiceDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.house
-        context['edit_url'] = reverse_lazy('service_update', kwargs={'pk': self.object.pk, 'house_id': self.object.house.id})
+        context["house"] = self.object.house
+        context["edit_url"] = reverse_lazy('service_update', kwargs={'pk': self.object.pk, 'house_id': self.object.house.id})
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -213,7 +213,7 @@ class ApartmentListView(ListView):
     model = Apartment
     template_name = 'customers_list.html'
     context_object_name = "apartments"
-    ordering = ['apartment_nr']
+    ordering = ["apartment_nr"]
 
 
 class ApartmentDetailView(DetailView):
@@ -223,8 +223,8 @@ class ApartmentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.address
-        context['edit_url'] = reverse_lazy('apartment_update', kwargs={
+        context["house"] = self.object.address
+        context["edit_url"] = reverse_lazy('apartment_update', kwargs={
             'pk': self.object.pk,
             'house_id': self.object.address.id
         })
@@ -253,8 +253,8 @@ class ConsumerDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         house_id = self.kwargs.get('house_id')
-        context['house_id'] = house_id
-        context['edit_url'] = reverse_lazy('consumer_update', kwargs={
+        context["house_id"] = house_id
+        context["edit_url"] = reverse_lazy('consumer_update', kwargs={
             'pk': self.object.pk,
             'house_id': house_id
         })
@@ -282,9 +282,9 @@ class MeterDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.apartment_number.address
-        context['apartment'] = self.object.apartment_number
-        context['edit_url'] = reverse_lazy('meter_update', kwargs={
+        context["house"] = self.object.apartment_number.address
+        context["apartment"] = self.object.apartment_number
+        context["edit_url"] = reverse_lazy('meter_update', kwargs={
             'pk': self.object.pk,
             'house_id': self.object.apartment_number.address.id
         })
@@ -318,7 +318,7 @@ class IncomingBillListView(ListView):
         # Get house_id from URL if it exists
         house_id = self.kwargs.get('house_id')
         if house_id:
-            context['house'] = House.objects.get(id=house_id)
+            context["house"] = House.objects.get(id=house_id)
         return context
 
 
@@ -329,8 +329,8 @@ class IncomingBillDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.house
-        context['edit_url'] = reverse_lazy('incoming_bill_update', kwargs={
+        context["house"] = self.object.house
+        context["edit_url"] = reverse_lazy('incoming_bill_update', kwargs={
             'pk': self.object.pk,
             'house_id': self.object.house.id
         })
@@ -359,7 +359,7 @@ class IncomingBillUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.house
+        context["house"] = self.object.house
         return context
 
 
@@ -379,10 +379,10 @@ def add_provider(request):
     if request.method == 'POST':
         form = ProviderForm(request.POST)
         if form.is_valid():
-            name = form['name'].value()
-            business_form = form['business_form'].value()
+            name = form["name"].value()
+            business_form = form["business_form"].value()
             name_and_form = name, business_form
-            reg_number = form['reg_number'].value()
+            reg_number = form["reg_number"].value()
             if name_and_form in providers_list:
                 text = f'Provider name {name.upper()} {business_form.upper()} is already registered'
             elif reg_number in reg_numbers:
@@ -416,9 +416,9 @@ def add_service(request, text=None):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
-            name_n_type = int(form['house'].value()), form['name'].value(), form['service_type'].value()
+            name_n_type = int(form["house"].value()), form["name"].value(), form["service_type"].value()
             if name_n_type in services_list:
-                text = f'Service name {form['name'].value().upper()} with type {form['service_type'].value().upper()} is already registered for this house'
+                text = f'Service name {form["name"].value().upper()} with type {form["service_type"].value().upper()} is already registered for this house'
             else:
                 service = form.save()  # Saves the new object to the database
                 return redirect('success_service', service_id=service.id)  # Redirect to a success page
@@ -442,10 +442,10 @@ def add_service_to_house(request, house_id, text=None):
     if request.method == 'POST':
         form = ServiceForm2(request.POST)
         if form.is_valid():
-            name_n_type = int(form['house'].value()), form['name'].value(), form['service_type'].value()
+            name_n_type = int(form["house"].value()), form["name"].value(), form["service_type"].value()
             # print(name_n_type)
             if name_n_type in services_list:
-                text = f'Service name {form['name'].value().upper()} with type {form['service_type'].value().upper()} is already registered for this house'
+                text = f'Service name {form["name"].value().upper()} with type {form["service_type"].value().upper()} is already registered for this house'
             else:
                 service = form.save(commit=False)
                 service.house = house
@@ -474,7 +474,7 @@ def add_house(request):
     if request.method == 'POST':
         form = HouseForm(request.POST)
         if form.is_valid():
-            if form['address'] in houses_list:
+            if form["address"] in houses_list:
                 text = 'House address already registered'
             else:
                 house = form.save()  # Saves the new object to the database
@@ -501,7 +501,7 @@ def add_consumer(request):
     if request.method == 'POST':
         form = ConsumerForm(request.POST)
         if form.is_valid():
-            name_mail = form['name'].value(), form['e_mail'].value()
+            name_mail = form["name"].value(), form["e_mail"].value()
             print(name_mail)
             if name_mail in consumers_list:
                 text = 'This consumer name is already registered'
@@ -530,7 +530,7 @@ def add_apartment(request, **kwargs):
     if request.method == 'POST':
         form = ApartmentForm(request.POST)
         if form.is_valid():
-            house_apartment = form['address'].value(), form['apartment_nr'].value()
+            house_apartment = form["address"].value(), form["apartment_nr"].value()
             if house_apartment in house_apartments_list:
                 text = 'Apartment is already registered'
             else:
@@ -559,7 +559,7 @@ def add_apartment_to_house(request, house_id):
     if request.method == 'POST':
         form = ApartmentForm2(request.POST)
         if form.is_valid():
-            house_apartment = str(house_id), form['apartment_nr'].value()
+            house_apartment = str(house_id), form["apartment_nr"].value()
             if house_apartment in house_apartments_list:
                 text = 'Apartment is already registered'
             else:
@@ -597,7 +597,7 @@ def add_meter(request, house_id=None, apartment_id=None):
     if request.method == 'POST':
         form = MeterForm(request.POST)
         if form.is_valid():
-            if (form['manufacturer'].value(), form['series'].value(), form['number'].value()) in meters_list:
+            if (form["manufacturer"].value(), form["series"].value(), form["number"].value()) in meters_list:
                 text = 'Meter is already registered'
             else:
                 meter = form.save()  
@@ -638,7 +638,7 @@ def add_meter_to_apartment(request, house_id, apartment_id, text=None):
     if request.method == 'POST':
         form = MeterForm2(request.POST)
         if form.is_valid():
-            meter_info = form['manufacturer'].value(), form['series'].value(), form['number'].value()
+            meter_info = form["manufacturer"].value(), form["series"].value(), form["number"].value()
             print(meter_info)
             if meter_info in apartment_meters_list:
                 text = 'Meter is already registered'
@@ -658,7 +658,7 @@ def add_meter_to_apartment(request, house_id, apartment_id, text=None):
     
 
 @login_required
-def meters_by_apartment(request, apartment_id, house_id):
+def meters_by_apartment(request, house_id, apartment_id):
     apartment = get_object_or_404(Apartment, id=apartment_id)
     house = get_object_or_404(House, id=house_id)
     
@@ -669,9 +669,9 @@ def meters_by_apartment(request, apartment_id, house_id):
     apartment_meters = Meter.objects.filter(apartment_number=apartment.id)
     
     context = {
+        'house': house,
         'apartment': apartment,
         'apartment_meters': apartment_meters,
-        'house': house
     }
     return render(request, 'bills/meters_by_apartment.html', context)
 
@@ -788,7 +788,7 @@ def add_meter_reading(request, meter_id, house_id=None, apartment_id=None):
     if request.method == 'POST':
         form = MeterReadingForm(meter=meter, data=request.POST)
         if form.is_valid():
-            reading_date = form.cleaned_data['reading_date']
+            reading_date = form.cleaned_data["reading_date"]
             # Check if reading already exists for this month
             existing_reading = MeterReading.objects.filter(
                 meter=meter,
@@ -1000,7 +1000,7 @@ def calculate_total_bills(request, house_id):
     # Get current month readings for water meters
     current_readings = MeterReading.objects.filter(
         meter__apartment_number__address=house,
-        meter__type__in=['cold', 'hot'],
+        meter__type__in=["cold', 'hot"],
         reading_date__year=selected_year,
         reading_date__month=selected_month
     ).select_related('meter', 'meter__apartment_number')
@@ -1008,7 +1008,7 @@ def calculate_total_bills(request, house_id):
     # Get previous month readings for water meters
     prev_readings = MeterReading.objects.filter(
         meter__apartment_number__address=house,
-        meter__type__in=['cold', 'hot'],
+        meter__type__in=["cold', 'hot"],
         reading_date__year=prev_year,
         reading_date__month=prev_month
     ).select_related('meter', 'meter__apartment_number')
@@ -1052,6 +1052,7 @@ def calculate_total_bills(request, house_id):
         individual_positions = []
         monthly_consumption = 0        
         total_amount = 0
+        quantity_received = 0
 
         # Calculate object count services (every apartment pays for the same amount)
         if object_count_bills:
@@ -1159,14 +1160,14 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     ))
     
     # Add title
-    elements.append(Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles['DejaVuSans-Bold']))
-    elements.append(Paragraph(f"Address: {house.address}", styles['DejaVuSans']))
-    elements.append(Paragraph(f"Period: {year}-{month}", styles['DejaVuSans']))
+    elements.append(Paragraph(f"Bill for Apartment {apartment.apartment_nr}", styles["DejaVuSans-Bold"]))
+    elements.append(Paragraph(f"Address: {house.address}", styles["DejaVuSans"]))
+    elements.append(Paragraph(f"Period: {year}-{month}", styles["DejaVuSans"]))
     elements.append(Spacer(1, 20))
     
     # Prepare data for tables
-    public_data = ['Service', 'Quantity', 'Units', 'Price/Unit', 'Amount']
-    individual_data = ['Service', 'Meter', 'Consumption', 'Units', 'Price/Unit', 'Amount']
+    public_data = ["Service', 'Quantity', 'Units', 'Price/Unit', 'Amount"]
+    individual_data = ["Service', 'Meter', 'Consumption', 'Units', 'Price/Unit', 'Amount"]
     monthly_consumption = 0    
     total_amount = 0
     
@@ -1187,7 +1188,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
 
     # Add living person count services
     living_person_bills = incoming_bills.filter(service__service_type='living_person_count')
-    total_living_persons = Apartment.objects.filter(address=house).aggregate(Sum('living_person_count'))['living_person_count__sum'] or 0
+    total_living_persons = Apartment.objects.filter(address=house).aggregate(Sum('living_person_count'))["living_person_count__sum"] or 0
     
     if total_living_persons > 0:  # Only process if there are living persons
         for bill in living_person_bills:
@@ -1256,7 +1257,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     
     # Create tables
     if len(public_data) > 1:
-        elements.append(Paragraph("Object Count Services", styles['Heading2']))
+        elements.append(Paragraph("Object Count Services", styles["Heading2"]))
         public_table = Table(public_data)
         public_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -1272,7 +1273,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     print(len(public_data))
     print(len(individual_data))
     if len(individual_data) > 1:
-        elements.append(Paragraph("Volume Services", styles['Heading2']))
+        elements.append(Paragraph("Volume Services", styles["Heading2"]))
         individual_table = Table(individual_data)
         individual_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -1287,7 +1288,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
         elements.append(individual_table)
     
     # Add total amount
-    elements.append(Paragraph(f"Total Amount: {total_amount:.2f}", styles['Heading2']))
+    elements.append(Paragraph(f"Total Amount: {total_amount:.2f}", styles["Heading2"]))
     
     # Build PDF
     doc.build(elements)
@@ -1298,7 +1299,7 @@ def generate_apartment_bill_pdf(request, house_id, apartment_id, year, month):
     
     # Create the HTTP response
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="bill_{apartment.apartment_nr}_{year}_{month}.pdf"'
+    response["Content-Disposition"] = f'attachment; filename="bill_{apartment.apartment_nr}_{year}_{month}.pdf"'
     response.write(pdf)
     return response
 
@@ -1312,15 +1313,15 @@ class HouseUpdateView(UpdateView):
         # Calculate the number of apartments
         apartment_count = Apartment.objects.filter(address=self.object).count()
         # Set the initial value for the apartment_count field
-        form.fields['apartment_count'].initial = apartment_count
+        form.fields["apartment_count"].initial = apartment_count
         # Calculate total area from apartments
-        total_area = Apartment.objects.filter(address=self.object).aggregate(Sum('area'))['area__sum'] or 0
-        form.fields['area_of_apartments_total'].initial = total_area
-        form.fields['area_of_apartments_total'].widget.attrs['readonly'] = True
+        total_area = Apartment.objects.filter(address=self.object).aggregate(Sum('area'))["area__sum"] or 0
+        form.fields["area_of_apartments_total"].initial = total_area
+        form.fields["area_of_apartments_total"].widget.attrs["readonly"] = True
         # Calculate total heated area from apartments
-        total_heated_area = Apartment.objects.filter(address=self.object).aggregate(Sum('heated_area'))['heated_area__sum'] or 0
-        form.fields['area_of_apartments_heated_total'].initial = total_heated_area
-        form.fields['area_of_apartments_heated_total'].widget.attrs['readonly'] = True
+        total_heated_area = Apartment.objects.filter(address=self.object).aggregate(Sum('heated_area'))["heated_area__sum"] or 0
+        form.fields["area_of_apartments_heated_total"].initial = total_heated_area
+        form.fields["area_of_apartments_heated_total"].widget.attrs["readonly"] = True
         return form
 
     def get_success_url(self):
@@ -1347,7 +1348,7 @@ class ServiceUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.house
+        context["house"] = self.object.house
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -1372,7 +1373,7 @@ class ApartmentUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.address
+        context["house"] = self.object.address
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -1396,7 +1397,7 @@ class ConsumerUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house_id'] = self.kwargs.get('house_id')
+        context["house_id"] = self.kwargs.get('house_id')
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -1421,8 +1422,8 @@ class MeterUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['house'] = self.object.apartment_number.address
-        context['apartment'] = self.object.apartment_number
+        context["house"] = self.object.apartment_number.address
+        context["apartment"] = self.object.apartment_number
         return context
 
     def dispatch(self, request, *args, **kwargs):

@@ -25,66 +25,74 @@
             </div>
         </div>
         <div class="card-body">
-            <table class="table">
-                <tr>
-                    <th>Apartment Number:</th>
-                    <td>{{ apartment.apartment_nr }}</td>
-                </tr>
-                <tr>
-                    <th>House:</th>
-                    <td>{{ apartment.address.address }}</td>
-                </tr>
-                <tr>
-                    <th>Area:</th>
-                    <td>{{ apartment.area }}</td>
-                </tr>
-                <tr>
-                    <th>Heated Area:</th>
-                    <td>{{ apartment.heated_area }}</td>
-                </tr>
-                <tr>
-                    {% if apartment.cold_water_meters_count > 0 %}
-                        <th>Count of cold water meters:</th>
-                        <td>{{ apartment.cold_water_meters_count }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    {% if apartment.hot_water_meters_count > 0 %}
-                        <th>Count of hot water meters:</th>
-                        <td>{{ apartment.hot_water_meters_count }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    {% if apartment.heat_meters_count > 0 %}
-                        <th>Count of heat meters:</th>
-                        <td>{{ apartment.heat_meters_count }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    {% if apartment.electricity_meters_count > 0 %}
-                        <th>Count of electricity meters:</th>
-                        <td>{{ apartment.electricity_meters_count }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    {% if apartment.gas_meters_count > 0 %}
-                        <th>Count of gas meters:</th>
-                        <td>{{ apartment.gas_meters_count }}</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <th>Living Person Count:</th>
-                    <td>{{ apartment.living_person_count }}</td>
-                </tr>
-                <tr>
-                    <th>Declared Person Count:</th>
-                    <td>{{ apartment.declared_person_count }}</td>
-                </tr>
-                <tr>
-                    <th>Consumer:</th>
-                    <td>{{ apartment.consumer.name|default:"No consumer assigned" }}</td>
-                </tr>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%">Property</th>
+                            <th style="width: 70%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Apartment Number</td>
+                            <td>{{ apartment.apartment_nr }}</td>
+                        </tr>
+                        <tr>
+                            <td>House Address</td>
+                            <td>{{ apartment.address.address }}</td>
+                        </tr>
+                        <tr>
+                            <td>Area</td>
+                            <td>{{ apartment.area }}</td>
+                        </tr>
+                        <tr>
+                            <td>Mean House Part</td>
+                            <td>{{ apartment.mean_house_part }}</td>
+                        </tr>
+                        <tr>
+                            <td>Heated Area</td>
+                            <td>{{ apartment.heated_area }}</td>
+                        </tr>
+                        <tr>
+                            <td>Cold Water Meters Count</td>
+                            <td>{{ apartment.cold_meters_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Hot Water Meters Count</td>
+                            <td>{{ apartment.hot_meters_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Heat Meters Count</td>
+                            <td>{{ apartment.heat_meters_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Electricity Meters Count</td>
+                            <td>{{ apartment.electricity_meters_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Gas Meters Count</td>
+                            <td>{{ apartment.gas_meters_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Living Person Count</td>
+                            <td>{{ apartment.living_person_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Declared Person Count</td>
+                            <td>{{ apartment.declared_person_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Consumer</td>
+                            <td>{{ apartment.consumer.name|default:"No consumer assigned" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Contract Number</td>
+                            <td>{{ apartment.contract_nr|default:"Not specified" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             
             <div class="mt-4">
                 <a href="{% url 'meters_by_apartment' house.id apartment.id %}" class="btn btn-info">View Meters</a>

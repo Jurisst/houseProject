@@ -46,7 +46,7 @@
                                     <div class="btn-group" role="group">
                                         <a href="{% url 'add_meter_reading' meter_id=meter.id house_id=house.id %}" 
                                            class="btn btn-sm btn-primary">Add Reading</a>
-                                        <a href="{% url 'meters_by_apartment' apartment_id=meter.apartment_number.id house_id=house.id %}" 
+                                        <a href="{% url 'meters_by_apartment' house_id=house.id apartment_id=meter.apartment_number.id %}" 
                                            class="btn btn-sm btn-info">View Apartment Meters</a>
                                     </div>
                                 </td>

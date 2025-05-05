@@ -44,6 +44,10 @@
                             <td>{{ house.address }}</td>
                         </tr>
                         <tr>
+                            <td>Number of Apartments</td>
+                            <td>{{ house.apartment_count }}</td>
+                        </tr>
+                        <tr>
                             <td>Total Area of Apartments</td>
                             <td>{{ house.area_of_apartments_total }}</td>
                         </tr>
@@ -52,16 +56,40 @@
                             <td>{{ house.area_of_apartments_heated_total }}</td>
                         </tr>
                         <tr>
-                            <td>Number of Apartments</td>
-                            <td>{{ house.apartment_count }}</td>
-                        </tr>
-                        <tr>
-                            <td>Number of living persons</td>
+                            <td>Number of Living Persons</td>
                             <td>{{ house.living_person_count }}</td>
                         </tr>
                         <tr>
-                            <td>Number of declared persons</td>
+                            <td>Number of Declared Persons</td>
                             <td>{{ house.declared_person_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Area</td>
+                            <td>{{ house.area_total }}</td>
+                        </tr>
+                        <tr>
+                            <td>Water Calculation Type 1</td>
+                            <td>{{ house.get_water_calculation_type_1_display }}</td>
+                        </tr>
+                        <tr>
+                            <td>Water Calculation Type 2</td>
+                            <td>{{ house.get_water_calculation_type_2_display }}</td>
+                        </tr>
+                        <tr>
+                            <td>Water Difference Calculation</td>
+                            <td>{{ house.get_water_difference_calculation_display }}</td>
+                        </tr>
+                        <tr>
+                            <td>Waste Calculation Type</td>
+                            <td>{{ house.get_waste_calculation_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <td>Waste Water Calculation Type</td>
+                            <td>{{ house.get_waste_water_calculation_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <td>Norm for Person</td>
+                            <td>{{ house.norm_for_person }}</td>
                         </tr>
                     </tbody>
                 </table>
