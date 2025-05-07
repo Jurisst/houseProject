@@ -59,3 +59,13 @@ def is_not_unique_incoming_bill(form, existing_bills):
         return 'Incoming bill for this period and service is already registered. Please check the data.'
     else:
         return None
+
+def is_valid_decimal(form_field):
+    try:
+        form_field = form_field.strip()
+        if ',' in form_field:
+            form_field = form_field.replace(',', '.')
+        float(form_field)
+        return True
+    except ValueError:
+        return False

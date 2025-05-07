@@ -2,6 +2,7 @@ from .models import IncomingBill, Apartment, Meter, MeterReading
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from datetime import datetime
 
 
 SERVICE_TO_METER_TYPE = {
@@ -46,24 +47,23 @@ def calculate_object_count_bills(house, bills, public_positions, apartments, Ser
 
 
 def calculate_bills_for_person_count(house, bills, public_positions, apartment, Service, total_amount): 
+    monthly_consumption = 0
     for bill in bills:
         bill_type = bill.service.service_type
-        
         # pay for person count
         if bill_type == 'volume' and house.water_calculation_type_2 == 'living_person_count':
             bill_type = 'living_person_count'
-            # print(f"VOLUME TO LIVING PERSON COUNT")
         if bill_type == 'volume' and house.water_calculation_type_2 == 'declared_person_count':
             bill_type = 'declared_person_count'
-            # print(f"VOLUME TO DECLARED PERSON COUNT")
         if bill_type == 'living_person_count':
             amount = house.norm_for_person * bill.service.price_per_unit * apartment.living_person_count
+            monthly_consumption = house.norm_for_person * apartment.living_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
                 'area': apartment.area, 
                 'living_person_count': apartment.living_person_count,
                 'declared_person_count': apartment.declared_person_count,
-                'quantity': round(bill.quantity_received / house.living_person_count * apartment.living_person_count, 2),                
+                'quantity': monthly_consumption,
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
                 'service_type': bill.service.service_type,
                 'amount': round(amount, 2),
@@ -75,12 +75,13 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
             })
         if bill_type == 'declared_person_count':
             amount = house.norm_for_person * bill.service.price_per_unit * apartment.declared_person_count
+            monthly_consumption = house.norm_for_person * apartment.declared_person_count
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
                 'area': apartment.area, 
                 'living_person_count': apartment.living_person_count,
                 'declared_person_count': apartment.declared_person_count,
-                'quantity': round(bill.quantity_received / house.declared_person_count * apartment.declared_person_count, 2),
+                'quantity': monthly_consumption,
                 'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name),
                 'service_type': bill.service.service_type,
                 'amount': round(amount, 2),
@@ -90,9 +91,8 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-        # print(f"Amount: {amount}")
         total_amount += float(amount) + float(vat_amount)
-    return total_amount
+    return total_amount, monthly_consumption
 
 
 def calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount):
@@ -117,6 +117,7 @@ def calculate_area_services(house, area_bills, apartment, public_positions, Serv
 
 # executed in calculate_total_bills, apartment scope
 def calculate_volume_services(volume_bills, apartment, selected_year, selected_month, individual_positions, Service, total_amount, monthly_consumption):
+    quantity_received = 0
     for bill in volume_bills:
         quantity_received = bill.quantity_received
         # Use the mapping to get the correct meter type
@@ -129,6 +130,12 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
         
             for meter in meters:
                 default_reading = meter.reading_default
+                # Get previous reading for this meter
+                last_reading = MeterReading.objects.filter(
+                    meter=meter,
+                    reading_date__lt=datetime(selected_year, selected_month, 1)
+                ).order_by('-reading_date').first()
+                
                 # Get current month reading
                 current_reading = MeterReading.objects.filter(
                     meter=meter,
@@ -153,8 +160,12 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                 if current_reading and prev_reading:
                     consumption = current_reading.reading_value - prev_reading.reading_value
                 elif current_reading and not prev_reading:
-                    # assume that the previous reading is missing and the current reading is the first reading
-                    consumption = current_reading.reading_value - default_reading
+                    # If no previous month reading, use the last available reading
+                    if last_reading:
+                        consumption = current_reading.reading_value - last_reading.reading_value
+                    else:
+                        # If no last reading available, use default reading
+                        consumption = current_reading.reading_value - default_reading
                 else:
                     consumption = 0
                     print(f"""No consumption for apartment {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter. 
@@ -174,6 +185,7 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                     'current_reading': current_reading,
                     'prev_reading': prev_reading,
                     'default_reading': default_reading,
+                    'last_reading': last_reading,
                     'vat_amount': vat_amount,
                     'total': round(float(amount) + vat_amount, 2),
                     'quantity_received': bill.quantity_received
@@ -194,12 +206,9 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
         house = bill.house
         if bill.service.name == 'cold_water' or bill.service.name == 'hot_water':
             if bill.quantity_received > total_consumption:
-                # print(f"Cold water bill: {bill.quantity_received} > {total_consumption}")
                 difference = bill.quantity_received - total_consumption
                 if apartment in apartments_with_missing_readings:
-                    print(f"Cold water bill: {bill.quantity_received} > {total_consumption} and apartment {apartment.apartment_nr} in apartments_with_missing_readings")
                     difference_for_apartment = difference/len(apartments_with_missing_readings)
-                    print(f"Difference for apartment {apartment.apartment_nr}: {difference_for_apartment} l197")
                 else:
                     if house.water_difference_calculation == 'object_count': # MK 524.10.1
                         difference_for_apartment = difference / house.apartment_count
@@ -228,30 +237,29 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                                     reading_date__month=last_month
                                 ).first()
                             
-                            if last_reading:
-                                # Get the reading before last month
-                                if last_month == 1:
-                                    prev_month = 12
-                                    prev_year = last_year - 1
-                                else:
-                                    prev_month = last_month - 1
-                                    prev_year = last_year
-                                    
-                                prev_reading = MeterReading.objects.filter(
-                                    meter=meter,
-                                    reading_date__year=prev_year,
-                                    reading_date__month=prev_month
-                                ).first()
+                                if last_reading:
+                                    # Get the reading before last month
+                                    if last_month == 1:
+                                        prev_month = 12
+                                        prev_year = last_year - 1
+                                    else:
+                                        prev_month = last_month - 1
+                                        prev_year = last_year
+                                        
+                                    prev_reading = MeterReading.objects.filter(
+                                        meter=meter,
+                                        reading_date__year=prev_year,
+                                        reading_date__month=prev_month
+                                    ).first()
 
-                                if prev_reading:
-                                    last_month_consumption += last_reading.reading_value - prev_reading.reading_value
+                                    if prev_reading:
+                                        last_month_consumption += last_reading.reading_value - prev_reading.reading_value
+                                    else:
+                                        print(f"No previous reading for {meter.apartment_number.apartment_nr} {meter.type} meter")
                                 else:
-                                    print(f"No previous reading for {meter.apartment_number.apartment_nr} {meter.type} meter")
-                            else:
-                                print(f"No last reading for {meter.apartment_number.apartment_nr} {meter.type} meter")
+                                    print(f"No last reading for {meter.apartment_number.apartment_nr} {meter.type} meter")
                         else:
-                            print
-                                
+                            print(f"No meters found for apartment {apartment.apartment_nr}")
                                 
                         # Get the previous month's bill amount
                         previous_month_bill = IncomingBill.objects.filter(
@@ -265,16 +273,10 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                             if previous_month_bill:
                                 if last_month_consumption > 0:
                                     proportion = last_month_consumption / previous_month_bill.quantity_received
-                                    print(f"Proportion: {proportion} l254")
                                 else:
-                                    print(f"Last month consumption: {last_month_consumption} l260")
-                                    print(f"No last month consumption for {house.address} {bill.service.name} l260")
                                     difference_for_apartment = apartment.living_person_count * house.norm_for_person
-                                    print(f"Difference: {difference_for_apartment} l258")
                             else:
-                                print(f"No previous month bill for {house.address} {bill.service.name}")
                                 proportion = 0
-                                print(f"Proportion: {proportion} l262")
                         elif house.water_difference_calculation == 'last_3_months_consumption': # MK 524.10.3
                             # Calculate consumption for previous 3 months
                             three_months_consumption = last_month_consumption
@@ -330,14 +332,10 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                             if three_months_bill_quantity > 0:
                                 proportion = three_months_consumption / three_months_bill_quantity
                             else:
-                                print(f"No previous 3 months bills for {house.address} {bill.service.name}")
                                 proportion = 0
 
-                        
                             # Calculate difference based on the proportion
                             difference_for_apartment = (bill.quantity_received - total_consumption) * proportion
-                        else:
-                            print(f"Difference: {difference_for_apartment} l329")
 
                 amount = difference_for_apartment * bill.service.price_per_unit
                 vat_amount = calculate_vat(bill, amount)
@@ -347,7 +345,7 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                     'vat_amount': vat_amount,
                     'total': round(float(amount) + vat_amount, 2)
                 })
-                total_amount += float(amount) + float(vat_amount)
+                total_amount = float(total_amount) + float(amount) + float(vat_amount)
     return total_amount
     
 # def get_previous_months_readings(bills, house, apartment):
@@ -369,7 +367,7 @@ def check_apartment_water_meter_readings(apartment, year, month):
             has_readings: Boolean indicating if any meter has readings
             missing_meters: List of meter types missing readings
             last_reading_date: Date of the most recent reading found (None if no readings)
-            missing_readings_data: List of missing readings data
+            missing_readings_data: Dictionary of missing readings data
     """
     # Get all water meters for the apartment
     water_meters = Meter.objects.filter(
@@ -378,7 +376,7 @@ def check_apartment_water_meter_readings(apartment, year, month):
     )
     
     if not water_meters.exists():
-        return False, ['cold', 'hot'], None
+        return False, ['cold', 'hot'], None, {}
     
     missing_meters = []
     missing_readings_data = {}

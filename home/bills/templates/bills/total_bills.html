@@ -172,6 +172,10 @@
                                                     <td>
                                                         {% if position.prev_reading %}
                                                             {{ position.prev_reading.reading_value }}
+                                                        {% elif position.default_reading %}
+                                                            {{ position.default_reading.reading_value }}
+                                                        {% elif position.last_reading %}
+                                                            {{ position.last_reading.reading_value }}
                                                         {% else %}
                                                             <span class="text-warning">{% translate "No data" %}</span>
                                                         {% endif %}
