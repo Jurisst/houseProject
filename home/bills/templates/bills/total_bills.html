@@ -204,7 +204,7 @@
                                 {% endif %}
                             {% endif %}
                             <div class="text-end mt-3">
-                                <strong>{% translate "Total Amount" %}: {{ bill_data.total }} € </strong>
+                                <strong>{% translate "Total Amount" %}: {{ bill_data.total|floatformat:2 }} € </strong>
                             </div>
                         </div>
                     </div>

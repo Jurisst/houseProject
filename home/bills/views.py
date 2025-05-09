@@ -43,6 +43,7 @@ from .calculations import (
     calculate_water_difference,
     calculate_area_services,
     check_apartment_water_meter_readings,
+    calculate_norm_consumption_for_apartments_without_meters,
     SERVICE_TO_METER_TYPE
 )
 from .validations import is_valid_decimal
@@ -412,7 +413,6 @@ def add_service(request, text=None):
     for s in services:
         name_type = s.house.id, s.name, s.service_type
         services_list.append(name_type)
-    print(services_list)
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
@@ -444,7 +444,6 @@ def add_service_to_house(request, house_id, text=None):
         if is_valid_decimal(form["price_per_unit"].value()):
             if form.is_valid():
                 name_n_type = int(form["house"].value()), form["name"].value(), form["service_type"].value()
-                # print(name_n_type)
             if name_n_type in services_list:
                 text = f'Service name {form["name"].value().upper()} with type {form["service_type"].value().upper()} is already registered for this house'
             else:
@@ -496,14 +495,12 @@ def add_consumer(request):
     consumers_list = []
     for consumer in consumers:
         name_mail = consumer.name, consumer.e_mail
-        print(name_mail)
         consumers_list.append(name_mail)
     text = None
     if request.method == 'POST':
         form = ConsumerForm(request.POST)
         if form.is_valid():
             name_mail = form["name"].value(), form["e_mail"].value()
-            print(name_mail)
             if name_mail in consumers_list:
                 text = 'This consumer name is already registered'
             else:
@@ -635,12 +632,10 @@ def add_meter_to_apartment(request, house_id, apartment_id, text=None):
     for meter in meters:
         meter_info = meter.manufacturer, meter.series, meter.number
         apartment_meters_list.append(meter_info)
-    print(apartment_meters_list)
     if request.method == 'POST':
         form = MeterForm2(request.POST)
         if form.is_valid():
             meter_info = form["manufacturer"].value(), form["series"].value(), form["number"].value()
-            print(meter_info)
             if meter_info in apartment_meters_list:
                 text = 'Meter is already registered'
             elif not invalid_meters_count(form, meters, apartment):
@@ -1020,30 +1015,38 @@ def calculate_total_bills(request, house_id):
         for reading in prev_readings
     }
 
+    # Get apartments with meters
+    apartments_with_meters = []
+    apartments_without_meters = []
+    for apartment in apartments:
+        if apartment.cold_meters_count > 0 or apartment.hot_meters_count > 0:
+            apartments_with_meters.append(apartment)
+        else:
+            apartments_without_meters.append(apartment)
+
     # Calculate total house water consumption
     house_water_consumption = 0
     for reading in current_readings:
         prev_reading = prev_readings_dict.get(reading.meter_id, reading.meter.reading_default)
         consumption = reading.reading_value - prev_reading
         house_water_consumption += consumption
+    # Calculate total house water consumption for apartments without meters
+    consumption_from_apartments_without_meters = calculate_norm_consumption_for_apartments_without_meters(house, apartments_without_meters, selected_year, selected_month)
+    house_water_consumption += consumption_from_apartments_without_meters
 
-    apartments_with_meters = []
-    for apartment in apartments:
-        if apartment.cold_meters_count > 0 or apartment.hot_meters_count > 0:
-            apartments_with_meters.append(apartment)
-    print(f"Apartments with meters: {apartments_with_meters}")
+
     # Check for apartments with missing readings
     apartments_with_missing_readings = {}
     if house.water_calculation_type_1 == 'volume':
         for apartment in apartments:
-            has_readings, missing_meters, last_reading_date, missing_readings_data = check_apartment_water_meter_readings(apartment, selected_year, selected_month)
-            if not has_readings:
-                apartments_with_missing_readings[apartment] = {
-                    'missing_meters': missing_meters,
-                    'last_reading_date': last_reading_date,
-                    'missing_readings_data': missing_readings_data
-                }
-    print(f"Apartments with missing readings: {apartments_with_missing_readings}")  
+                if apartment in apartments_with_meters:
+                    has_readings, missing_meters, last_reading_date, missing_readings_data = check_apartment_water_meter_readings(apartment, selected_year, selected_month)
+                    if not has_readings:
+                        apartments_with_missing_readings[apartment] = {
+                            'missing_meters': missing_meters,
+                            'last_reading_date': last_reading_date,
+                            'missing_readings_data': missing_readings_data
+                        }
     # Create a dictionary to store bill details for each apartment
     apartment_bills = {}
 
@@ -1061,24 +1064,17 @@ def calculate_total_bills(request, house_id):
         # Calculate living person count services  (for currently residing (living or declared) persons)
         if living_person_bills: 
             total_amount, monthly_consumption = calculate_bills_for_person_count(house, living_person_bills, public_positions, apartment, Service, total_amount)
+            house_water_consumption += monthly_consumption
         if declared_person_bills:
             total_amount, monthly_consumption = calculate_bills_for_person_count(house, declared_person_bills, public_positions, apartment, Service, total_amount)
-        
+            house_water_consumption += monthly_consumption
         # Calculate area services (for total area or heated area of the apartment)
         if area_bills:
             total_amount = calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount)
-        
         # Calculate volume (metered) services
         if volume_bills:
             # Check if this apartment has meters
             if apartment in apartments_with_meters:
-                # Check if this apartment has missing readings
-                apartment_missing_readings = apartments_with_missing_readings.get(apartment)
-                if apartment_missing_readings:
-                    # If apartment has missing readings, calculate the difference between the house's total consumption and the quantity received
-                    # and split the difference between the apartments without meters                    
-                    total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, float(total_amount), Service, apartments_with_missing_readings)
-                else:
                     # If all readings are present, calculate normally
                     total_amount, monthly_consumption, quantity_received = calculate_volume_services(
                         volume_bills,
@@ -1090,18 +1086,22 @@ def calculate_total_bills(request, house_id):
                         float(total_amount),
                         monthly_consumption,
                     )
-                    if not apartment_missing_readings:
+                            # Check if this apartment has missing readings
+                    apartment_missing_readings = apartments_with_missing_readings.get(apartment)
+                    if apartment_missing_readings:
+                        # If apartment has missing readings for 3, calculate the difference between the house's total consumption and the quantity received
+                        # and split the difference between the apartments without meters                    
                         total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, float(total_amount), Service, apartments_with_missing_readings)
             else:
                 if house.water_calculation_type_2 == 'living_person_count' or house.water_calculation_type_2 == 'declared_person_count':
-                    total_amount = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
-                    if not apartment_missing_readings:
-                        total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service, apartments_with_missing_readings)
+                    total_amount, monthly_consumption = calculate_bills_for_person_count(house, volume_bills, public_positions, apartment, Service, total_amount)
+                    print(f"Total amount volume bill for person count after calculation: {total_amount}")
                 elif house.water_calculation_type_2 == 'object_count':
                     total_amount = calculate_object_count_bills(house, volume_bills, public_positions, apartment, Service, total_amount)
-                    if not apartment_missing_readings:
-                        total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service, apartments_with_missing_readings)
-
+            if not apartment_missing_readings:
+                print(f"Total amount volume bill for object count before calculation: {total_amount}")
+                total_amount = calculate_water_difference(volume_bills, apartment, selected_year, selected_month, individual_positions, house_water_consumption, total_amount, Service, apartments_with_missing_readings)
+                print(f"Total amount volume bill for object count after calculation: {total_amount}")
         apartment_bills[apartment] = {
             'public_positions': public_positions,
             'individual_positions': individual_positions,

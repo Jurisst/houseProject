@@ -24,6 +24,7 @@ def calculate_vat(bill_data, total_amount):
 
 
 def calculate_object_count_bills(house, bills, public_positions, apartments, Service, total_amount):
+    print(f"Calculating object count")
     # Handle both QuerySet and single Apartment object cases
     apartments_count = apartments.count() if hasattr(apartments, 'count') else 1
     
@@ -47,6 +48,7 @@ def calculate_object_count_bills(house, bills, public_positions, apartments, Ser
 
 
 def calculate_bills_for_person_count(house, bills, public_positions, apartment, Service, total_amount): 
+    print(f"Calculating bills for person count")
     monthly_consumption = 0
     for bill in bills:
         bill_type = bill.service.service_type
@@ -56,8 +58,8 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
         if bill_type == 'volume' and house.water_calculation_type_2 == 'declared_person_count':
             bill_type = 'declared_person_count'
         if bill_type == 'living_person_count':
-            amount = house.norm_for_person * bill.service.price_per_unit * apartment.living_person_count
-            monthly_consumption = house.norm_for_person * apartment.living_person_count
+            amount = float(house.norm_for_person * bill.service.price_per_unit * apartment.living_person_count)
+            monthly_consumption = float(house.norm_for_person) * float(apartment.living_person_count)
             vat_amount = calculate_vat(bill, amount)
             public_positions.append({
                 'area': apartment.area, 
@@ -91,11 +93,12 @@ def calculate_bills_for_person_count(house, bills, public_positions, apartment, 
                 'vat_amount': vat_amount,
                 'total': round(float(amount) + vat_amount, 2)
             })
-        total_amount += float(amount) + float(vat_amount)
+            total_amount += float(amount) + float(vat_amount)
     return total_amount, monthly_consumption
 
 
 def calculate_area_services(house, area_bills, apartment, public_positions, Service, total_amount):
+    print(f"Calculating area services")
     for bill in area_bills:
         pay_for_unit = bill.amount / house.area_of_apartments_total
         amount = pay_for_unit * apartment.area
@@ -115,11 +118,41 @@ def calculate_area_services(house, area_bills, apartment, public_positions, Serv
         total_amount += float(amount) + float(vat_amount)
     return total_amount
 
+def get_current_reading(meter, year, month):
+    current_reading = MeterReading.objects.filter(
+        meter=meter,
+        reading_date__year=year,
+        reading_date__month=month
+    ).first()
+    return current_reading
+
+def get_previous_reading(meter, year, month):
+    prev_month = month - 1
+    prev_year = year
+    if month == 1:
+        prev_month = 12
+        prev_year = year - 1
+    prev_reading = MeterReading.objects.filter(
+        meter=meter,
+        reading_date__year=prev_year,
+        reading_date__month=prev_month
+    ).first()
+    return prev_reading
+
+def get_last_reading(meter, year, month):
+    last_reading = MeterReading.objects.filter(
+        meter=meter,
+        reading_date__lt=datetime(year, month, 1)
+    ).order_by('-reading_date').first()
+    return last_reading
+
 # executed in calculate_total_bills, apartment scope
 def calculate_volume_services(volume_bills, apartment, selected_year, selected_month, individual_positions, Service, total_amount, monthly_consumption):
+    print(f"Calculating volume services")
     quantity_received = 0
     for bill in volume_bills:
         quantity_received = bill.quantity_received
+        print(f"Quantity received: {quantity_received}")
         # Use the mapping to get the correct meter type
         meter_type = SERVICE_TO_METER_TYPE.get(bill.service.name)
         if meter_type:
@@ -131,31 +164,15 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
             for meter in meters:
                 default_reading = meter.reading_default
                 # Get previous reading for this meter
-                last_reading = MeterReading.objects.filter(
-                    meter=meter,
-                    reading_date__lt=datetime(selected_year, selected_month, 1)
-                ).order_by('-reading_date').first()
-                
+                last_reading = get_last_reading(meter, selected_year, selected_month)
+                # print(f"Last reading for {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter: {last_reading}")
                 # Get current month reading
-                current_reading = MeterReading.objects.filter(
-                    meter=meter,
-                    reading_date__year=selected_year,
-                    reading_date__month=selected_month
-                ).first()
-                
+                current_reading = get_current_reading(meter, selected_year, selected_month)
+                # print(f"Current reading for {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter: {current_reading}")
                 # Get previous month reading
-                if selected_month == 1:
-                    prev_month = 12
-                    prev_year = selected_year - 1
-                else:
-                    prev_month = selected_month - 1
-                    prev_year = selected_year
-                    
-                prev_reading = MeterReading.objects.filter(
-                    meter=meter,
-                    reading_date__year=prev_year,
-                    reading_date__month=prev_month
-                ).first()
+                prev_reading = get_previous_reading(meter, selected_year, selected_month)
+                # print(f"Previous reading for {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter: {prev_reading}")
+                
                 
                 if current_reading and prev_reading:
                     consumption = current_reading.reading_value - prev_reading.reading_value
@@ -168,8 +185,8 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                         consumption = current_reading.reading_value - default_reading
                 else:
                     consumption = 0
-                    print(f"""No consumption for apartment {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter. 
-                          Apartment has {meter.apartment_number.cold_meters_count} cold and {meter.apartment_number.hot_meters_count} hot meters.""")
+                    # print(f"""No consumption for apartment {meter.apartment_number.apartment_nr} {meter.type} {meter.number} meter. 
+                    #       Apartment has {meter.apartment_number.cold_meters_count} cold and {meter.apartment_number.hot_meters_count} hot meters.""")
 
                 monthly_consumption += consumption
                 
@@ -193,7 +210,7 @@ def calculate_volume_services(volume_bills, apartment, selected_year, selected_m
                 if total_amount is None:
                     total_amount = 0.0
                 total_amount += float(amount) + float(vat_amount)
-                
+                print(f"Total amount volume bill calculations.py after calculation: {total_amount}")
     return total_amount, monthly_consumption, quantity_received
 
 
@@ -201,12 +218,11 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
     # Used in calculate_total_bills/calculate_volume_services. 
     # Calculates the difference between the total consumption and the quantity received.
     # Splits the difference between the apartments without meters.
-
     for bill in bills:
         house = bill.house
         if bill.service.name == 'cold_water' or bill.service.name == 'hot_water':
             if bill.quantity_received > total_consumption:
-                difference = bill.quantity_received - total_consumption
+                difference = float(bill.quantity_received) - float(total_consumption)
                 if apartment in apartments_with_missing_readings:
                     difference_for_apartment = difference/len(apartments_with_missing_readings)
                 else:
@@ -337,7 +353,7 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                             # Calculate difference based on the proportion
                             difference_for_apartment = (bill.quantity_received - total_consumption) * proportion
 
-                amount = difference_for_apartment * bill.service.price_per_unit
+                amount = difference_for_apartment * float(bill.service.price_per_unit)
                 vat_amount = calculate_vat(bill, amount)
                 individual_positions.append({
                     'service': dict(Service.NAME_CHOICES).get(bill.service.name, bill.service.name) + ' (difference)',
@@ -345,7 +361,9 @@ def calculate_water_difference(bills, apartment, selected_year, selected_month, 
                     'vat_amount': vat_amount,
                     'total': round(float(amount) + vat_amount, 2)
                 })
-                total_amount = float(total_amount) + float(amount) + float(vat_amount)
+                print(f"T
+
+                total_amount = total_amount + float(amount) + float(vat_amount)
     return total_amount
     
 # def get_previous_months_readings(bills, house, apartment):
@@ -446,3 +464,33 @@ def check_apartment_water_meter_readings(apartment, year, month):
                 last_reading_date = reading.reading_date
     
     return len(missing_meters) < len(water_meters), missing_meters, last_reading_date, missing_readings_data
+
+def calculate_norm_consumption_for_apartments_without_meters(house, apartments_without_meters, selected_year, selected_month):
+    """
+    Calculates monthly consumption for apartments without meters based on person norms.
+    
+    Args:
+        house: House object
+        apartments_without_meters: List of Apartment objects that don't have meters
+        selected_year: Year to calculate for
+        selected_month: Month to calculate for
+        
+    Returns:
+        float: Total consumption based on norms for apartments without meters
+    """
+    total_norm_consumption = 0
+    
+    for apartment in apartments_without_meters:
+        # Calculate consumption based on living persons
+        if house.water_calculation_type_2 == 'living_person_count':
+            norm_consumption = house.norm_for_person * apartment.living_person_count
+        # Calculate consumption based on declared persons
+        elif house.water_calculation_type_2 == 'declared_person_count':
+            norm_consumption = house.norm_for_person * apartment.declared_person_count
+        # If no person count type specified, use living persons
+        else:
+            norm_consumption = house.norm_for_person * apartment.living_person_count
+            
+        total_norm_consumption += norm_consumption
+        
+    return total_norm_consumption
